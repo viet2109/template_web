@@ -3,6 +3,7 @@ const routers = {
   login: "/login",
   register: "/signup",
   notFound: "*",
+  detail: "/detail",
 };
 
 export default routers;
