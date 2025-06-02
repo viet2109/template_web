@@ -4,6 +4,7 @@ const routers = {
   register: "/signup",
   notFound: "*",
   detail: "/detail",
+  categories: "/categories",
 };
 
 export default routers;
