@@ -32,7 +32,7 @@ const commentsDataInit: Comment[] = [
                 id: 2,
                 user: "TemplateAdmin",
                 isAuthor: true,
-                timeAgo: "over 1 year ago",
+                timeAgo: "cách đây 1 ngày",
                 message:
                     "Vâng,\n\nXin chào bạn , hãy liên hệ email templateteam@gmail.com để được hỗ trợ.\n\nCảm ơn bạn rất nhiều!",
             },
