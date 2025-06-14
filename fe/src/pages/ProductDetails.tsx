@@ -65,7 +65,7 @@ function ProductDetails() {
 
                     <div className="p-6 rounded-lg mb-6" style={{ backgroundColor: 'rgb(242, 239, 231)', color: 'rgb(41, 115, 178)', border: '1px solid rgb(72, 166, 167)' }}>
                         <p className="text-sm mb-4">
-                            Tải không giới hạn với <strong>{product.price}</strong>
+                            Tải không giới hạn với <strong>{product.price} đ</strong>
                         </p>
                         <ul className="text-sm mb-4 list-disc list-inside" style={{ color: 'rgb(46 87 122)' }}>
                             <li>Hơn 22 triệu tài nguyên cao cấp</li>
