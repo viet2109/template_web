@@ -51,7 +51,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ priceRange, setPriceRange
         <aside className="w-full md:w-1/5 space-y-6 p-4">
             {/* Bộ lọc giá */}
             <Box>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                <Typography variant="h6" fontWeight="bold" gutterBottom
+                            sx={{ color: 'rgb(46 87 122)' }}>
                     Giá
                 </Typography>
                 <Slider
@@ -69,7 +70,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ priceRange, setPriceRange
 
             {/* Chủ đề */}
             <Box>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: 'rgb(46 87 122)' }}>
                     Chủ đề
                 </Typography>
                 {topics.map((topic) => (
@@ -89,7 +90,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ priceRange, setPriceRange
 
             {/* Framework/Ngôn ngữ */}
             <Box>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: 'rgb(46 87 122)' }}>
                     Công nghệ sử dụng
                 </Typography>
                 {frameworks.map((fw) => (
@@ -109,7 +110,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ priceRange, setPriceRange
 
             {/* Tính năng */}
             <Box>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ color: 'rgb(46 87 122)' }}>
                     Tính năng
                 </Typography>
                 {features.map((feature) => (
@@ -129,7 +130,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ priceRange, setPriceRange
 
             {/* Không gian màu */}
             <Box>
-                <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                <Typography variant="h6" fontWeight="bold" gutterBottom
+                            sx={{ color: 'rgb(46 87 122)' }}>
                     Không gian màu
                 </Typography>
                 {colorSpaces.map((space) => (

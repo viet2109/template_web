@@ -5,6 +5,7 @@ const routers = {
   notFound: "*",
   detail: "/detail",
   categories: "/categories",
+  cart: "/cart",
 };
 
 export default routers;

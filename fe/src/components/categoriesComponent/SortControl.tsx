@@ -8,7 +8,8 @@ interface SortControlProps {
 const SortControl: React.FC<SortControlProps> = ({ sort, setSort }) => {
     return (
         <div className="flex justify-end mb-4">
-            <label htmlFor="sort" className="mr-2 font-medium text-gray-700">Sắp xếp theo</label>
+            <h6 htmlFor="sort" className="mr-2 font-bold text-gray-700" style={{
+                color: "rgb(46 87 122)"}}>Sắp xếp theo</h6>
             <select
                 id="sort"
                 value={sort}
