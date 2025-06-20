@@ -176,7 +176,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
         <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm self-end"
+            className="bg-[#2973B2] text-white px-4 py-2 rounded hover:bg-[#1f5c90] text-sm self-end transition"
         >
             Gửi đánh giá
         </button>
@@ -294,37 +294,37 @@ const ProductReviews: React.FC = () => {
     };
 
     return (
-        <div className="bg-gray-50 p-4 rounded-lg shadow-sm max-w-3xl mx-auto">
+        <div className="bg-gray-50 p-4 rounded-lg shadow-sm w-full">
             {/* Tabs */}
             <div className="flex border-b mb-4">
                 <button
                     onClick={() => setActiveTab("reviews")}
                     className={`flex items-center px-4 py-2 border-r ${
-                        activeTab === "reviews" ? "text-blue-700 font-bold" : "text-gray-700"
+                        activeTab === "reviews" ? "text-[#2973B2] font-bold" : "text-gray-700"
                     }`}
                 >
                     Đánh giá
-                    <span className="ml-1 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-            {reviews.length}
-          </span>
+                    <span className="ml-1 bg-[#2973B2] text-white text-xs font-bold px-2 py-1 rounded-full">
+    {reviews.length}
+</span>
                 </button>
                 <button
                     onClick={() => setActiveTab("comments")}
                     className={`flex items-center px-4 py-2 ${
-                        activeTab === "comments" ? "text-blue-700 font-bold" : "text-gray-700"
+                        activeTab === "comments" ? "text-[#2973B2] font-bold" : "text-gray-700"
                     }`}
                 >
                     Bình luận
-                    <span className="ml-1 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-            {comments.length}
-          </span>
+                    <span className="ml-1 bg-[#2973B2] text-white text-xs font-bold px-2 py-1 rounded-full">
+    {comments.length}
+</span>
                 </button>
             </div>
 
             {/* Reviews tab */}
             {activeTab === "reviews" && (
                 <>
-                    <h2 className="text-lg font-semibold mb-2 text-blue-900">
+                <h2 className="text-lg font-semibold mb-2 text-blue-900">
                         {reviews.length} Lượt đánh giá
                     </h2>
                     <ReviewForm
@@ -333,7 +333,7 @@ const ProductReviews: React.FC = () => {
                         onSubmit={handleSubmit}
                     />
                     {visibleReviews.map((review) => (
-                        <ReviewItem key={review.id} review={review} />
+                        <ReviewItem key={review.id} review={review}/>
                     ))}
                     {reviews.length > 3 && (
                         <div className="text-center">
@@ -368,7 +368,7 @@ const ProductReviews: React.FC = () => {
                                 timeAgo: "vừa xong",
                             };
                             setComments([newComment, ...comments]);
-                            setReplyBoxes((prev) => ({ ...prev, 0: "" }));
+                            setReplyBoxes((prev) => ({...prev, 0: ""}));
                         }}
                         className="flex flex-col gap-2 mb-6"
                     >
@@ -381,7 +381,7 @@ const ProductReviews: React.FC = () => {
                         <div className="text-right">
                             <button
                                 type="submit"
-                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+                                className="bg-[#2973B2] text-white px-4 py-2 rounded hover:bg-[#1f5c90] text-sm transition"
                             >
                                 Gửi bình luận
                             </button>
@@ -394,7 +394,7 @@ const ProductReviews: React.FC = () => {
                             <div className="mb-1">
                                 <span className="font-bold">{comment.user}</span>
                                 {comment.purchased && (
-                                    <span className="ml-2 text-green-600 text-xs font-semibold">
+                                    <span className="ml-2 text-xs font-semibold" style={{color: "#48A6A7"}}>
               Đã mua hàng
             </span>
                                 )}
@@ -410,7 +410,8 @@ const ProductReviews: React.FC = () => {
                             {/* Reply box toggle + reply list */}
                             <div className="mt-2">
                                 <button
-                                    className="text-blue-600 text-xs hover:underline"
+                                    className="text-xs hover:underline"
+                                    style={{ color: "#2973B2" }}
                                     onClick={() => toggleReply(comment.id)}
                                 >
                                     Trả lời
@@ -427,7 +428,7 @@ const ProductReviews: React.FC = () => {
                                         <div className="text-right">
                                             <button
                                                 onClick={() => handleReplySubmit(comment.id)}
-                                                className="bg-blue-600 text-white px-3 py-1 mt-2 rounded text-xs"
+                                                className="bg-[#2973B2] text-white px-3 py-1 mt-2 rounded text-xs hover:bg-[#1f5c90] transition"
                                             >
                                                 Gửi trả lời
                                             </button>

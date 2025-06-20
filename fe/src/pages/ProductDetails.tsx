@@ -17,7 +17,7 @@ function ProductDetails() {
     }
 
     return (
-        <div className="container mx-auto px-4 py-10" style={{ color: 'rgb(15 25 33)' }}>
+        <div className="container mx-auto px-4 py-10" style={{color: 'rgb(15 25 33)'}}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                 {/* Cột trái */}
                 <div className="lg:col-span-8">
@@ -46,12 +46,6 @@ function ProductDetails() {
                         {product.note && (
                             <p className="text-sm italic mb-6">* {product.note}</p>
                         )}
-
-                        <h3 className="text-xl font-semibold mb-2" style={{color: 'rgb(46 87 122)'}}>Đánh giá sản
-                            phẩm</h3>
-                        <div className="mb-6">
-                            <ProductReviews />
-                        </div>
                         <h3 className="text-xl font-semibold mb-2" style={{color: 'rgb(46 87 122)'}}>Thẻ sản phẩm</h3>
                         <div className="flex flex-wrap gap-2">
                             {product.tags.map((tag, i) => (
@@ -119,6 +113,13 @@ function ProductDetails() {
                     </div>
                 </div>
             </div>
+            <div className="mt-10 p-6 border border-gray-200 rounded-lg shadow-sm bg-white">
+                <h3 className="text-xl font-semibold mb-4 text-[#2E577A]">
+                    Đánh giá sản phẩm và bình luận
+                </h3>
+                <ProductReviews/>
+            </div>
+
         </div>
     );
 }
