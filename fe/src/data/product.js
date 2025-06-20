@@ -66,7 +66,48 @@ fully compatible, editable and pixel perfect. Also, they are well-organized, car
     fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
     note: "Preview images are not included into main file",
     price: "$16.50/month"
-}
+},
+
+    {
+        id: 3,
+        name: "SynthWave – Retro Cyber Template",
+        images: [
+            {
+                url: "https://cdn.dribbble.com/users/14268/screenshots/14889472/media/65d6c8de25829f7b9b6eeb13cddf3b16.png",
+                alt: "Main Image",
+            },
+            {
+                url: "https://cdn.dribbble.com/users/14268/screenshots/14889472/media/b1ce7b43d7329160281a1e51de81f4a4.png",
+                alt: "Preview 1",
+            },
+            {
+                url: "https://cdn.dribbble.com/users/14268/screenshots/14889472/media/da0996e3ae46a52f0a13530ca7ec2579.png",
+                alt: "Preview 2",
+            },
+        ],
+        description: `SynthWave – Retro Cyber Template: Vintage-inspired cyberpunk template with retro wave aesthetics. Editable in Figma, Adobe XD, and Sketch.`,
+        filesIncluded: ["Figma File", "PSD File", "Sketch File"],
+        features: [
+            "Retro colors and gradients",
+            "Pixel perfect layers",
+            "Free Google Fonts",
+            "Clean and well-organized files",
+            "Easy customization",
+        ],
+        applicationsSupported: ["Figma", "Adobe XD", "Sketch", "Photoshop"],
+        fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
+        note: "Preview images are not included in main file",
+        price: "$21.00/month",
+        tags: [
+            "Retro",
+            "SynthWave",
+            "Cyberpunk",
+            "Template",
+            "UI",
+            "Design",
+            "Vintage",
+        ],
+    }
 ];
 
 export default product;
