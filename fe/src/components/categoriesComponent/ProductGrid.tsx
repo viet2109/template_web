@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { FaHeart, FaDownload } from 'react-icons/fa';
 
 const products = [
@@ -45,7 +45,18 @@ const products = [
 ];
 
 const ProductGrid: React.FC = () => {
+    const [currentPage, setCurrentPage] = useState(1);
+    const productsPerPage = 4;
+    const totalPages = Math.ceil(products.length / productsPerPage);
+    const startIdx = (currentPage - 1) * productsPerPage;
+    const currentProducts = products.slice(startIdx, startIdx + productsPerPage);
+
+    const goToPage = (page: number) => {
+        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    };
     return (
+        <div className="space-y-8">
+            {/* Grid sản phẩm */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map((product) => (
                 <div key={product.id} className="relative group overflow-hidden rounded-lg shadow hover:shadow-lg transition-all">
@@ -63,6 +74,51 @@ const ProductGrid: React.FC = () => {
                     </div>
                 </div>
             ))}
+        </div>
+            {/* Pagination */}
+            <div className="flex justify-center items-center space-x-2 mt-6">
+                {/* Mũi tên trái */}
+                <button
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`w-10 h-10 rounded border text-sm font-medium transition duration-200 flex items-center justify-center
+            ${currentPage === 1
+                        ? 'text-gray-400 border-gray-300 cursor-not-allowed'
+                        : 'text-[rgb(46,87,122)] border-[rgb(46,87,122)] hover:bg-[#2973B2] hover:text-white'}
+        `}
+                >
+                    ‹
+                </button>
+
+                {/* Số trang */}
+                {Array.from({length: totalPages}, (_, i) => i + 1).map((page) => (
+                    <button
+                        key={page}
+                        onClick={() => goToPage(page)}
+                        className={`w-10 h-10 rounded border text-base font-semibold transition duration-200 flex items-center justify-center
+                ${page === currentPage
+                            ? 'bg-[#2973B2] text-white'
+                            : 'text-[rgb(46,87,122)] border-[rgb(46,87,122)] hover:bg-[#2973B2] hover:text-white'}
+            `}
+                    >
+                        {page}
+                    </button>
+                ))}
+
+                {/* Mũi tên phải */}
+                <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`w-10 h-10 rounded border text-sm font-medium transition duration-200 flex items-center justify-center
+            ${currentPage === totalPages
+                        ? 'text-gray-400 border-gray-300 cursor-not-allowed'
+                        : 'text-[rgb(46,87,122)] border-[rgb(46,87,122)] hover:bg-[#2973B2] hover:text-white'}
+        `}
+                >
+                    ›
+                </button>
+            </div>
+
         </div>
     );
 };

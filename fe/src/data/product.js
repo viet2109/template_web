@@ -29,7 +29,7 @@ fully compatible, editable and pixel perfect. Also, they are well-organized, car
     ],
     fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
     note: "Preview images are not included into main file",
-    price: "$16.50/month",
+    price: 16.50,
     tags: [
         "Cyber", "Interface", "It", "Website", "Uiux", "Digital",
         "Technology", "Privacy", "System", "Network", "Robot",
@@ -39,11 +39,11 @@ fully compatible, editable and pixel perfect. Also, they are well-organized, car
 
 {
     id: 2,
-        name: "Cyber.AI – Cyber Punk Website",
+        name: "Catalog template",
     images: [
-    { url: "https://elements-resized.envatousercontent.com/elements-cover-images/7b8bbfed-bf68-419d-b6f6-11dabe3f0d13?w=1370", alt: "Main Image" },
+    { url: "https://elements-resized.envatousercontent.com/elements-cover-images/9b4c98e8-9154-4228-8529-98efd1ba56f5?w=710&cf_fit=scale-down&q=85&format=auto&s=55735dbfa3d863f0ed846f2827bd17e86654266ae60d592a59707335c490095c", alt: "Main Image" },
     { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvvFdYEBSG2i9o8haT45_5fVHiSkC6LQR1iwevgWcWYMRl0wH9uNkRwzsAl8ehqjGnQh8", alt: "Preview 1" },
-    { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqxQwVPaXdhY4OO6-6YiCEL4aIVUDrmqf0xA&s", alt: "Preview 2" },
+    { url: "https://elements-resized.envatousercontent.com/elements-cover-images/9b4c98e8-9154-4228-8529-98efd1ba56f5?w=710&cf_fit=scale-down&q=85&format=auto&s=55735dbfa3d863f0ed846f2827bd17e86654266ae60d592a59707335c490095c", alt: "Preview 2" },
 ],
     description: `Cyber.AI – Cyber Punk Website: This template is simple but yet professional and modern website. 
 You can edit it in Figma, Adobe XD, SKETCH, and Adobe Photoshop. Easy to insert your content, change the colors, 
@@ -65,48 +65,127 @@ fully compatible, editable and pixel perfect. Also, they are well-organized, car
 ],
     fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
     note: "Preview images are not included into main file",
-    price: "$16.50/month"
+    price: 16.50
 },
-
     {
         id: 3,
-        name: "SynthWave – Retro Cyber Template",
+        name: "Carousel template",
         images: [
-            {
-                url: "https://cdn.dribbble.com/users/14268/screenshots/14889472/media/65d6c8de25829f7b9b6eeb13cddf3b16.png",
-                alt: "Main Image",
-            },
-            {
-                url: "https://cdn.dribbble.com/users/14268/screenshots/14889472/media/b1ce7b43d7329160281a1e51de81f4a4.png",
-                alt: "Preview 1",
-            },
-            {
-                url: "https://cdn.dribbble.com/users/14268/screenshots/14889472/media/da0996e3ae46a52f0a13530ca7ec2579.png",
-                alt: "Preview 2",
-            },
+            { url: "https://elements-resized.envatousercontent.com/elements-cover-images/6b08f161-9be0-4382-9281-529bff06d38a?w=710&cf_fit=scale-down&q=85&format=auto&s=ec91015e500daeb3f93bd440ff8eef869bf1bfce08712230335abfd75de371f5", alt: "Main Image" },
+            { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvvFdYEBSG2i9o8haT45_5fVHiSkC6LQR1iwevgWcWYMRl0wH9uNkRwzsAl8ehqjGnQh8", alt: "Preview 1" },
+            { url: "https://elements-resized.envatousercontent.com/elements-cover-images/6b08f161-9be0-4382-9281-529bff06d38a?w=710&cf_fit=scale-down&q=85&format=auto&s=ec91015e500daeb3f93bd440ff8eef869bf1bfce08712230335abfd75de371f5", alt: "Preview 2" },
         ],
-        description: `SynthWave – Retro Cyber Template: Vintage-inspired cyberpunk template with retro wave aesthetics. Editable in Figma, Adobe XD, and Sketch.`,
-        filesIncluded: ["Figma File", "PSD File", "Sketch File"],
+        description: `Cyber.AI – Cyber Punk Website: This template is simple but yet professional and modern website. 
+You can edit it in Figma, Adobe XD, SKETCH, and Adobe Photoshop. Easy to insert your content, change the colors, 
+all the templates are included and ready to be shared with your audience. All components are vector based, 
+fully compatible, editable and pixel perfect. Also, they are well-organized, carefully named and grouped.`,
+        filesIncluded: ["Figma File", "PSD File", "Adobe XD File", "Sketch File"],
         features: [
-            "Retro colors and gradients",
-            "Pixel perfect layers",
-            "Free Google Fonts",
-            "Clean and well-organized files",
-            "Easy customization",
+            "Compatible with Figma, Sketch, Adobe XD, Adobe Photoshop",
+            "Easy to Customize",
+            "Layered by name",
+            "All Font Free (Google Font)",
+            "Well Organized Layer",
         ],
-        applicationsSupported: ["Figma", "Adobe XD", "Sketch", "Photoshop"],
+        applicationsSupported: [
+            "Adobe Photoshop",
+            "Adobe XD",
+            "Figma",
+            "Sketch"
+        ],
         fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
-        note: "Preview images are not included in main file",
-        price: "$21.00/month",
-        tags: [
-            "Retro",
-            "SynthWave",
-            "Cyberpunk",
-            "Template",
-            "UI",
-            "Design",
-            "Vintage",
+        note: "Preview images are not included into main file",
+        price: 6.50
+    },
+    {
+        id: 4,
+        name: "Maketing template",
+        images: [
+            { url: "https://elements-resized.envatousercontent.com/elements-cover-images/465f7745-549b-404d-8c12-6ae844b1782b?w=710&cf_fit=scale-down&q=85&format=auto&s=449309aa23d6a281d8a58561de83fa3045bc12afee47b21954af7705722e3360", alt: "Main Image" },
+            { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvvFdYEBSG2i9o8haT45_5fVHiSkC6LQR1iwevgWcWYMRl0wH9uNkRwzsAl8ehqjGnQh8", alt: "Preview 1" },
+            { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqxQwVPaXdhY4OO6-6YiCEL4aIVUDrmqf0xA&s", alt: "Preview 2" },
         ],
+        description: `Cyber.AI – Cyber Punk Website: This template is simple but yet professional and modern website. 
+You can edit it in Figma, Adobe XD, SKETCH, and Adobe Photoshop. Easy to insert your content, change the colors, 
+all the templates are included and ready to be shared with your audience. All components are vector based, 
+fully compatible, editable and pixel perfect. Also, they are well-organized, carefully named and grouped.`,
+        filesIncluded: ["Figma File", "PSD File", "Adobe XD File", "Sketch File"],
+        features: [
+            "Compatible with Figma, Sketch, Adobe XD, Adobe Photoshop",
+            "Easy to Customize",
+            "Layered by name",
+            "All Font Free (Google Font)",
+            "Well Organized Layer",
+        ],
+        applicationsSupported: [
+            "Adobe Photoshop",
+            "Adobe XD",
+            "Figma",
+            "Sketch"
+        ],
+        fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
+        note: "Preview images are not included into main file",
+        price: 16.50
+    },
+    {
+        id: 5,
+        name: "Brand Guide template",
+        images: [
+            { url: "https://elements-resized.envatousercontent.com/elements-cover-images/3afe0273-dd8c-4d61-a415-5db522f9dc14?w=710&cf_fit=scale-down&q=85&format=auto&s=199cc91ec8eb6c89bb726acaf711cec40b534afc8355b2c7f57335b581bc9667", alt: "Main Image" },
+            { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvvFdYEBSG2i9o8haT45_5fVHiSkC6LQR1iwevgWcWYMRl0wH9uNkRwzsAl8ehqjGnQh8", alt: "Preview 1" },
+            { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqxQwVPaXdhY4OO6-6YiCEL4aIVUDrmqf0xA&s", alt: "Preview 2" },
+        ],
+        description: `Cyber.AI – Cyber Punk Website: This template is simple but yet professional and modern website. 
+You can edit it in Figma, Adobe XD, SKETCH, and Adobe Photoshop. Easy to insert your content, change the colors, 
+all the templates are included and ready to be shared with your audience. All components are vector based, 
+fully compatible, editable and pixel perfect. Also, they are well-organized, carefully named and grouped.`,
+        filesIncluded: ["Figma File", "PSD File", "Adobe XD File", "Sketch File"],
+        features: [
+            "Compatible with Figma, Sketch, Adobe XD, Adobe Photoshop",
+            "Easy to Customize",
+            "Layered by name",
+            "All Font Free (Google Font)",
+            "Well Organized Layer",
+        ],
+        applicationsSupported: [
+            "Adobe Photoshop",
+            "Adobe XD",
+            "Figma",
+            "Sketch"
+        ],
+        fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
+        note: "Preview images are not included into main file",
+        price: 16.50
+    },
+    {
+        id: 6,
+        name: "Cyber.AI – Cyber Punk Website",
+        images: [
+            { url: "https://elements-resized.envatousercontent.com/elements-cover-images/7b8bbfed-bf68-419d-b6f6-11dabe3f0d13?w=1370", alt: "Main Image" },
+            { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvvFdYEBSG2i9o8haT45_5fVHiSkC6LQR1iwevgWcWYMRl0wH9uNkRwzsAl8ehqjGnQh8", alt: "Preview 1" },
+            { url: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqxQwVPaXdhY4OO6-6YiCEL4aIVUDrmqf0xA&s", alt: "Preview 2" },
+        ],
+        description: `Cyber.AI – Cyber Punk Website: This template is simple but yet professional and modern website. 
+You can edit it in Figma, Adobe XD, SKETCH, and Adobe Photoshop. Easy to insert your content, change the colors, 
+all the templates are included and ready to be shared with your audience. All components are vector based, 
+fully compatible, editable and pixel perfect. Also, they are well-organized, carefully named and grouped.`,
+        filesIncluded: ["Figma File", "PSD File", "Adobe XD File", "Sketch File"],
+        features: [
+            "Compatible with Figma, Sketch, Adobe XD, Adobe Photoshop",
+            "Easy to Customize",
+            "Layered by name",
+            "All Font Free (Google Font)",
+            "Well Organized Layer",
+        ],
+        applicationsSupported: [
+            "Adobe Photoshop",
+            "Adobe XD",
+            "Figma",
+            "Sketch"
+        ],
+        fileTypes: ["FIG", "PSD", "SKETCH", "XD"],
+        note: "Preview images are not included into main file",
+        price: 16.50
     }
 ];
 
