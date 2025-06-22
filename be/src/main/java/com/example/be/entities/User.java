@@ -1,6 +1,7 @@
 package com.example.be.entities;
 
 
+import com.example.be.enums.AuthProvider;
 import com.example.be.enums.Role;
 import com.example.be.enums.UserStatus;
 import jakarta.persistence.*;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -27,14 +29,23 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider provider;
+
+    private String phone;
+
+    @OneToOne
+    private File avatar;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
     private String firstName;
     private String lastName;
 
@@ -42,7 +53,24 @@ public class User {
     @Column(nullable = false)
     private UserStatus status;
 
-    @Column(nullable = false)
+    private String providerId;
+
+    private String providerAvatarUrl;
+
     @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Set<Role> roles;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private SellerProfile sellerProfile;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private Set<Order> orders;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Wishlist> wishlists;
 }
