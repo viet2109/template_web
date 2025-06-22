@@ -28,12 +28,7 @@ public class VerificationEmailToken {
     @JoinColumn(nullable = false)
     private User user;
 
-    private LocalDateTime expiryDate;
-
-    @PrePersist
-    protected void onCreate() {
-        if (expiryDate == null) {
-            expiryDate = LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES);
-        }
-    }
+    @Column(nullable = false)
+    @Builder.Default
+    private LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(EXPIRATION_MINUTES);
 }
