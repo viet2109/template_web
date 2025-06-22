@@ -11,6 +11,9 @@ const routers = {
   analytics: "/admin/analytics",
   orders: "/admin/orders",
   notFound: "*",
+  detail: "/detail",
+  categories: "/categories",
+  cart: "/cart",
 };
 
 export default routers;
