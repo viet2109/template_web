@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from 'react-router-dom';
-import product from "../data/product.js"; // Đảm bảo import không có dấu ngoặc nhọn
+import product from "../../data/product.js"; // Đảm bảo import không có dấu ngoặc nhọn
 const LatestProducts: React.FC = () => {
     return (
         <div className="p-6 max-w-7xl mx-auto">

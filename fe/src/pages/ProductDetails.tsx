@@ -1,8 +1,8 @@
 import React from "react";
 import products from "../data/product.js";
 import ProductImageGallery from "../components/detailComponent/ProductImageGallery";
-import ProductReviews from "../components/ProductReviews.tsx";
-import LatestProducts from "../components/LatestProducts.tsx";
+import ProductReviews from "../components/reviewsComponent/ProductReviews.tsx";
+import SuggestedProducts from "../components/productsComponent/SuggestedProducts.tsx";
 
 function ProductDetails() {
     const productId = 1;
@@ -111,6 +111,8 @@ function ProductDetails() {
                             </div>
                         )}
                     </div>
+                    {/* Sản phẩm gợi ý */}
+                    <SuggestedProducts />
                 </div>
             </div>
             <div className="mt-10 p-6 border border-gray-200 rounded-lg shadow-sm bg-white">
