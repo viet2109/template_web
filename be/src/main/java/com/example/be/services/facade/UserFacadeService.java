@@ -106,6 +106,12 @@ public class UserFacadeService {
     }
 
     @PreAuthorize("#userId == authentication.principal.id")
+    public OrderDto updateOrderStatus(Long userId, Long orderId, UpdateOrderStatusDto dto, String orderIdPrefix) throws Exception {
+        Order order = orderDomainService.updateOrderStatus(orderId, dto, orderIdPrefix);
+        return orderMapper.entityToDto(order);
+    }
+
+    @PreAuthorize("#userId == authentication.principal.id")
     public OrderDto updateOrderStatus(Long userId, Long orderId, UpdateOrderStatusDto dto) throws Exception {
         Order order = orderDomainService.updateOrderStatus(orderId, dto);
         return orderMapper.entityToDto(order);

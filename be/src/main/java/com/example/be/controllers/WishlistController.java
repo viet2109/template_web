@@ -1,4 +1,4 @@
-package com.example.be.controller;
+package com.example.be.controllers;
 
 import com.example.be.Utils;
 import com.example.be.dto.user.WishlistDto;

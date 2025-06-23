@@ -10,10 +10,12 @@ const routers = {
   adminOrders: "/admin/orders",
   analytics: "/admin/analytics",
   orders: "/admin/orders",
-  notFound: "*",
   detail: "/detail",
   categories: "/categories",
+  checkout: "/checkout",
+  paymentVNPay: "/payment/vnpay",
   cart: "/cart",
+  notFound: "*",
 };
 
 export default routers;

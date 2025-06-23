@@ -14,6 +14,8 @@ import ProductDetails from "../pages/ProductDetails.tsx";
 import { Route } from "../types";
 import CategoriesProducts from "../pages/CategriesProducts.tsx";
 import Cart from "../pages/Cart.tsx";
+import CheckoutPage from "../pages/CheckoutPage.tsx";
+import PaymentConfirmation from "../pages/PaymentConfirmation.tsx";
 
 const publicRoutes: Route[] = [
   { path: routers.login, page: Login },
@@ -24,15 +26,20 @@ const publicRoutes: Route[] = [
   { path: routers.adminSellers, page: SellerManagement, layout: AdminLayout },
   { path: routers.analytics, page: RevenueDashboard, layout: AdminLayout },
   { path: routers.orders, page: OrderManagement, layout: AdminLayout },
-  { path: routers.detail, page: ProductDetails },
-  { path: routers.categories, page: CategoriesProducts },
-  { path: routers.cart, page: Cart },
+  { path: routers.detail, page: ProductDetails,  layout: DefaultLayout },
+  { path: routers.categories, page: CategoriesProducts, layout: DefaultLayout },
+  { path: routers.cart, page: Cart, layout: DefaultLayout },
   { path: routers.home, page: Home, layout: DefaultLayout },
 ];
 
 const privateRoutes: Route[] = [
   { path: routers.home, page: Home, layout: DefaultLayout },
+  { path: routers.checkout, page: CheckoutPage, layout: DefaultLayout },
+  {
+    path: routers.paymentVNPay,
+    page: PaymentConfirmation,
+    layout: DefaultLayout,
+  },
 ];
 
 export { privateRoutes, publicRoutes };
-

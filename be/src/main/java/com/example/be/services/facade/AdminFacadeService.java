@@ -93,15 +93,17 @@ public class AdminFacadeService {
         return categorySalesDtos;
     }
 
+    public AdminOrderAnalyticsDto getOrderAnalytic() {
+        return orderDao.getOrderAnalytic();
+    }
+
     public List<MonthlySalesDto> getMonthlySales() {
-//        return orderDao.getMonthlySales().stream()
-//                .map(result -> MonthlySalesDto.builder()
-//                        .month((String) result[0])
-//                        .totalSales((Integer) result[1])
-//                        .totalRevenue((Double) result[2])
-//                        .build())
-//                .collect(Collectors.toList());
-        return null;
+        LocalDate now = LocalDate.now();
+        LocalDateTime start = now.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime end = now.withDayOfMonth(now.lengthOfMonth())
+                .plusDays(1)
+                .atStartOfDay();
+        return orderDao.getMonthlySales(start, end);
     }
 
     private List<TopSellerDto> getTopSellers() {

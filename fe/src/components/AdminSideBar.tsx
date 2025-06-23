@@ -2,26 +2,22 @@ import React, { useEffect, useState } from "react";
 import {
   FiBarChart2,
   FiChevronDown,
-  FiDollarSign,
-  FiDownload,
   FiEdit,
-  FiEye,
-  FiFileText,
   FiGrid,
   FiHelpCircle,
   FiHome,
   FiLogOut,
   FiMenu,
-  FiPackage,
   FiSettings,
   FiShoppingBag,
-  FiStar,
-  FiTrendingUp,
   FiUsers,
-  FiX
+  FiX,
 } from "react-icons/fi";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import routers from "../config/router";
+import Swal from "sweetalert2";
+import { useDispatch } from "react-redux";
+import { logOutSuccess } from "../store/authSlice";
 
 interface MenuItem {
   id: string;
@@ -35,7 +31,44 @@ interface MenuItem {
 const AdminSidebar: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Xác nhận đăng xuất",
+      text: "Bạn có chắc chắn muốn đăng xuất không?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Đăng xuất",
+      cancelButtonText: "Hủy",
+      reverseButtons: true,
+      customClass: {
+        popup: "rounded-xl",
+        confirmButton: "rounded-lg",
+        cancelButton: "rounded-lg",
+      },
+    });
+
+    if (result.isConfirmed) {
+      console.log("User logged out");
+      dispatch(logOutSuccess());
+      navigate(routers.login);
+
+      Swal.fire({
+        title: "Đăng xuất thành công!",
+        text: "Bạn đã đăng xuất khỏi hệ thống.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+        customClass: {
+          popup: "rounded-xl",
+        },
+      });
+    }
+  };
   // Auto-open submenu if any of its items is active
   useEffect(() => {
     const currentPath = window.location.pathname;
@@ -63,41 +96,18 @@ const AdminSidebar: React.FC = () => {
       id: "templates",
       label: "Quản lý Template",
       icon: <FiGrid size={20} />,
-      badge: "248",
       path: routers.adminTemplates,
     },
     {
       id: "orders",
       label: "Quản lý Đơn hàng",
       icon: <FiShoppingBag size={20} />,
-      badge: "12",
       path: routers.adminOrders,
-      submenu: [
-        {
-          id: "all-orders",
-          label: "Tất cả đơn hàng",
-          icon: <FiFileText size={16} />,
-          path: "/orders/all",
-        },
-        {
-          id: "pending-orders",
-          label: "Chờ xử lý",
-          icon: <FiPackage size={16} />,
-          path: "/orders/pending",
-        },
-        {
-          id: "completed-orders",
-          label: "Hoàn thành",
-          icon: <FiDownload size={16} />,
-          path: "/orders/completed",
-        },
-      ],
     },
     {
       id: "users",
       label: "Quản lý Người dùng",
       icon: <FiUsers size={20} />,
-      badge: "1.2k",
       path: routers.adminUsers,
       submenu: [
         {
@@ -120,7 +130,6 @@ const AdminSidebar: React.FC = () => {
       label: "Thống kê & Báo cáo",
       icon: <FiBarChart2 size={20} />,
       path: routers.analytics,
-      
     },
   ];
 
@@ -136,12 +145,6 @@ const AdminSidebar: React.FC = () => {
       label: "Trợ giúp",
       icon: <FiHelpCircle size={20} />,
       path: "/help",
-    },
-    {
-      id: "logout",
-      label: "Đăng xuất",
-      icon: <FiLogOut size={20} />,
-      path: "/logout",
     },
   ];
 
@@ -378,6 +381,19 @@ const AdminSidebar: React.FC = () => {
             )}
           </NavLink>
         ))}
+        <button
+          onClick={handleLogout}
+          className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${"hover:bg-gray-50 text-gray-600 hover:text-gray-900"} ${
+            isCollapsed ? "justify-center px-0" : ""
+          }`}
+        >
+          <>
+            <span className={"text-gray-500"}>
+              <FiLogOut size={20} />
+            </span>
+            {!isCollapsed && <span className="font-medium">Đăng xuất</span>}
+          </>
+        </button>
       </div>
     </div>
   );

@@ -68,7 +68,8 @@ public class OrderDomainService {
         }
 
         // Calculate tax
-        double taxAmount = totalAmount.doubleValue() * 0.1; // 10% tax
+        double tax = 0;
+        double taxAmount = totalAmount.doubleValue() * (tax / 100);
 
         Order order = Order.builder()
                 .user(cartItems.get(0).getUser())
@@ -139,6 +140,24 @@ public class OrderDomainService {
 
         if (dto.getStatus() == OrderStatus.COMPLETED) {
             order.setCompletedAt(LocalDateTime.now());
+
+        }
+
+        return orderDao.save(order);
+    }
+
+    public Order updateOrderStatus(Long orderId, UpdateOrderStatusDto dto, String orderPrefix) throws Exception {
+        Order order = getOrderById(orderId);
+
+        order.setStatus(dto.getStatus());
+        order.setPaymentStatus(dto.getPaymentStatus());
+        if (dto.getNotes() != null) {
+            order.setNotes(dto.getNotes());
+        }
+
+        if (dto.getStatus() == OrderStatus.COMPLETED) {
+            order.setCompletedAt(LocalDateTime.now());
+            order.setPaymentTransactionId(orderPrefix + order.getId());
         }
 
         return orderDao.save(order);

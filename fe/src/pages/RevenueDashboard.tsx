@@ -1,9 +1,13 @@
-import { FC, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { endOfMonth, format, startOfMonth } from "date-fns";
+import { FC, useState } from "react";
 import { BsArrowUpRight } from "react-icons/bs";
 import {
+  FiAlertCircle,
   FiBarChart2,
   FiCalendar,
   FiDollarSign,
+  FiPackage,
   FiPieChart,
   FiRefreshCw,
   FiTrendingUp,
@@ -21,90 +25,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-type BarChartPeriod = "day" | "month" | "quarter" | "year";
-
-interface RevenueItem {
-  name: string;
-  revenue: number;
-  orders: number;
-}
-
-interface PieItem {
-  name: string;
-  value: number;
-  color: string;
-}
-
-const generateBarChartData = (
-  period: BarChartPeriod,
-  startDate: string,
-  endDate: string
-): RevenueItem[] => {
-  const data: RevenueItem[] = [];
-  const baseRevenue = 50000;
-
-  if (period === "day") {
-    for (let i = 0; i < 30; i++) {
-      data.push({
-        name: `${i + 1}/12`,
-        revenue: baseRevenue + Math.random() * 30000,
-        orders: Math.floor(Math.random() * 100) + 50,
-      });
-    }
-  } else if (period === "month") {
-    const months = [
-      "T1",
-      "T2",
-      "T3",
-      "T4",
-      "T5",
-      "T6",
-      "T7",
-      "T8",
-      "T9",
-      "T10",
-      "T11",
-      "T12",
-    ];
-    months.forEach((month) => {
-      data.push({
-        name: month,
-        revenue: baseRevenue + Math.random() * 50000,
-        orders: Math.floor(Math.random() * 200) + 100,
-      });
-    });
-  } else if (period === "quarter") {
-    const quarters: string[] = ["Q1", "Q2", "Q3", "Q4"];
-    quarters.forEach((quarter) => {
-      data.push({
-        name: quarter,
-        revenue: baseRevenue * 3 + Math.random() * 100000,
-        orders: Math.floor(Math.random() * 500) + 300,
-      });
-    });
-  } else if (period === "year") {
-    for (let i = 2020; i <= 2024; i++) {
-      data.push({
-        name: i.toString(),
-        revenue: baseRevenue * 12 + Math.random() * 200000,
-        orders: Math.floor(Math.random() * 2000) + 1000,
-      });
-    }
-  }
-
-  return data;
-};
-
-const generatePieChartData = (month: string): PieItem[] => {
-  return [
-    { name: "Template Business", value: 45, color: "#3B82F6" },
-    { name: "Template Portfolio", value: 25, color: "#10B981" },
-    { name: "Template E-commerce", value: 15, color: "#F59E0B" },
-    { name: "Template Blog", value: 10, color: "#EF4444" },
-    { name: "Template Landing Page", value: 5, color: "#8B5CF6" },
-  ];
-};
+import {
+  fetchRevenueByCategory,
+  fetchRevenueByPeriod,
+} from "../api/adminAnalytic";
+import { GroupBy } from "../types";
 
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat("vi-VN", {
@@ -116,6 +41,58 @@ const formatCurrency = (value: number): string => {
 
 const formatNumber = (value: number): string => {
   return new Intl.NumberFormat("vi-VN").format(value);
+};
+
+// Category display names mapping
+const categoryDisplayNames: Record<string, string> = {
+  BUSINESS: "Template Business",
+  PORTFOLIO: "Template Portfolio",
+  E_COMMERCE: "Template E-commerce",
+  BLOG: "Template Blog",
+  LANDING_PAGE: "Template Landing Page",
+  ADMIN_DASHBOARD: "Admin Dashboard",
+  CRM: "CRM",
+  CMS: "CMS",
+  OTHER: "Khác",
+};
+
+// Category colors
+const categoryColors: Record<string, string> = {
+  BUSINESS: "#3B82F6",
+  PORTFOLIO: "#10B981",
+  E_COMMERCE: "#F59E0B",
+  BLOG: "#EF4444",
+  LANDING_PAGE: "#8B5CF6",
+  ADMIN_DASHBOARD: "#06B6D4",
+  CRM: "#84CC16",
+  CMS: "#F97316",
+  OTHER: "#6B7280",
+};
+
+// Empty State Component
+const EmptyState: FC<{
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  actionText?: string;
+  onAction?: () => void;
+}> = ({ title, description, icon, actionText, onAction }) => {
+  return (
+    <div className="flex flex-col items-center justify-center h-full py-12">
+      <div className="p-4 bg-gray-100 rounded-full mb-4">{icon}</div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
+      <p className="text-gray-500 text-center mb-6 max-w-md">{description}</p>
+      {actionText && onAction && (
+        <button
+          onClick={onAction}
+          className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+        >
+          <FiRefreshCw className="w-4 h-4" />
+          <span className="text-sm font-medium">{actionText}</span>
+        </button>
+      )}
+    </div>
+  );
 };
 
 // Custom Tooltip Component for Bar Chart
@@ -130,14 +107,6 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
             <span className="font-medium">Doanh thu:</span>{" "}
             {formatCurrency(data.revenue)}
           </p>
-          <p className="text-green-600">
-            <span className="font-medium">Số đơn hàng:</span>{" "}
-            {formatNumber(data.orders)} đơn
-          </p>
-          <p className="text-purple-600">
-            <span className="font-medium">Giá trị TB/đơn:</span>{" "}
-            {formatCurrency(data.revenue / data.orders)}
-          </p>
         </div>
       </div>
     );
@@ -146,59 +115,90 @@ const CustomBarTooltip = ({ active, payload, label }: any) => {
 };
 
 const RevenueDashboard: FC = () => {
-  const [barChartPeriod, setBarChartPeriod] = useState<BarChartPeriod>("month");
-  const [barChartStartDate, setBarChartStartDate] =
-    useState<string>("2024-01-01");
-  const [barChartEndDate, setBarChartEndDate] = useState<string>("2024-12-31");
-  const [pieChartMonth, setPieChartMonth] = useState<string>("2024-12");
+  const [groupBy, setGroupBy] = useState<GroupBy>(GroupBy.MONTHLY);
 
-  const [barChartData, setBarChartData] = useState<RevenueItem[]>([]);
-  const [pieChartData, setPieChartData] = useState<PieItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const today = new Date();
+  const firstDayOfMonth = format(startOfMonth(today), "yyyy-MM-dd");
+  const lastDayOfMonth = format(endOfMonth(today), "yyyy-MM-dd");
 
-  const fetchData = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setBarChartData(
-        generateBarChartData(barChartPeriod, barChartStartDate, barChartEndDate)
-      );
-      setPieChartData(generatePieChartData(pieChartMonth));
-      setIsLoading(false);
-    }, 500);
+  const [startDate, setStartDate] = useState<string>(firstDayOfMonth);
+  const [endDate, setEndDate] = useState<string>(lastDayOfMonth);
+  const [pieChartMonth, setPieChartMonth] = useState<string>(
+    format(today, "yyyy-MM")
+  );
+
+  // Query for revenue by period
+  const {
+    data: revenueByPeriodData = [],
+    isLoading: isLoadingPeriod,
+    refetch: refetchPeriod,
+  } = useQuery({
+    queryKey: ["revenueByPeriod", startDate, endDate, groupBy],
+    queryFn: () =>
+      fetchRevenueByPeriod({
+        start: startDate,
+        end: endDate,
+        groupBy: groupBy,
+      }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Query for revenue by category
+  const {
+    data: revenueByCategoryData = [],
+    isLoading: isLoadingCategory,
+    refetch: refetchCategory,
+  } = useQuery({
+    queryKey: [
+      "revenueByCategory",
+      pieChartMonth.split("-")[0],
+      pieChartMonth.split("-")[1],
+    ],
+    queryFn: () =>
+      fetchRevenueByCategory({
+        year: parseInt(pieChartMonth.split("-")[0]),
+        month: parseInt(pieChartMonth.split("-")[1]),
+      }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const handleRefresh = () => {
+    refetchPeriod();
+    refetchCategory();
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [barChartPeriod, barChartStartDate, barChartEndDate, pieChartMonth]);
-
-  const totalRevenue: number = barChartData.reduce(
+  // Calculate totals
+  const totalRevenue = revenueByPeriodData.reduce(
     (sum, item) => sum + item.revenue,
     0
   );
-  const totalOrders: number = barChartData.reduce(
-    (sum, item) => sum + item.orders,
+  const totalCategoryRevenue = revenueByCategoryData.reduce(
+    (sum, item) => sum + item.revenue,
     0
   );
-  const avgOrderValue: number =
-    totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
-  // Threshold-based grouping for Pie Chart
-  const thresholdPercent = 10; // categories under 10% are "Other"
-  const transformPieData = (): PieItem[] => {
-    const filtered = pieChartData.filter(
-      (item) => item.value >= thresholdPercent
-    );
-    const othersValue = pieChartData
-      .filter((item) => item.value < thresholdPercent)
-      .reduce((sum, item) => sum + item.value, 0);
+  // Check if data is empty
+  const hasRevenueData = revenueByPeriodData.length > 0;
+  const hasCategoryData = revenueByCategoryData.length > 0;
 
-    if (othersValue > 0) {
-      filtered.push({ name: "Other", value: othersValue, color: "#CCCCCC" });
-    }
-    return filtered;
-  };
+  // Transform category data for pie chart
+  const pieChartData = revenueByCategoryData.map((item) => ({
+    name: categoryDisplayNames[item.category] || item.category,
+    value:
+      totalCategoryRevenue > 0
+        ? Math.round((item.revenue / totalCategoryRevenue) * 100)
+        : 0,
+    revenue: item.revenue,
+    color: categoryColors[item.category] || "#6B7280",
+  }));
 
-  const displayedPieData = transformPieData();
+  // Transform period data for bar chart
+  const barChartData = revenueByPeriodData.map((item) => ({
+    name: item.period,
+    revenue: item.revenue,
+  }));
+
+  const isLoading = isLoadingPeriod || isLoadingCategory;
 
   return (
     <div className="p-6 space-y-8 bg-gray-50 min-h-screen">
@@ -215,7 +215,7 @@ const RevenueDashboard: FC = () => {
           </div>
           <div className="flex items-center space-x-4 mt-4 sm:mt-0">
             <button
-              onClick={fetchData}
+              onClick={handleRefresh}
               className={`flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-200 ${
                 isLoading ? "animate-pulse" : ""
               }`}
@@ -225,12 +225,14 @@ const RevenueDashboard: FC = () => {
               />
               <span className="text-sm font-medium">Làm mới</span>
             </button>
-            <div className="flex items-center space-x-2 text-green-600">
-              <BsArrowUpRight className="w-6 h-6" />
-              <span className="text-sm font-medium">
-                +12.5% so với tháng trước
-              </span>
-            </div>
+            {hasRevenueData && (
+              <div className="flex items-center space-x-2 text-green-600">
+                <BsArrowUpRight className="w-6 h-6" />
+                <span className="text-sm font-medium">
+                  +12.5% so với tháng trước
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -244,7 +246,9 @@ const RevenueDashboard: FC = () => {
                 Tổng Doanh Thu
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(totalRevenue)}
+                {hasRevenueData
+                  ? formatCurrency(totalRevenue)
+                  : formatCurrency(0)}
               </p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
@@ -257,10 +261,13 @@ const RevenueDashboard: FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">
-                Tổng Đơn Hàng
+                Danh Mục Bán Chạy
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatNumber(totalOrders)}
+                {hasCategoryData
+                  ? categoryDisplayNames[revenueByCategoryData[0]?.category] ||
+                    revenueByCategoryData[0]?.category
+                  : "Chưa có dữ liệu"}
               </p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
@@ -273,10 +280,10 @@ const RevenueDashboard: FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600 mb-1">
-                Giá Trị Trung Bình
+                Tổng Danh Mục
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {formatCurrency(avgOrderValue)}
+                {revenueByCategoryData.length}
               </p>
             </div>
             <div className="p-3 bg-purple-100 rounded-full">
@@ -302,31 +309,29 @@ const RevenueDashboard: FC = () => {
             <div className="flex items-center space-x-2">
               <FiCalendar className="w-4 h-4 text-gray-500" />
               <select
-                value={barChartPeriod}
-                onChange={(e) =>
-                  setBarChartPeriod(e.target.value as BarChartPeriod)
-                }
+                value={groupBy}
+                onChange={(e) => setGroupBy(e.target.value as GroupBy)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
               >
-                <option value="day">Theo Ngày</option>
-                <option value="month">Theo Tháng</option>
-                <option value="quarter">Theo Quý</option>
-                <option value="year">Theo Năm</option>
+                <option value={GroupBy.DAILY}>Theo Ngày</option>
+                <option value={GroupBy.WEEKLY}>Theo Tuần</option>
+                <option value={GroupBy.MONTHLY}>Theo Tháng</option>
+                <option value={GroupBy.YEARLY}>Theo Năm</option>
               </select>
             </div>
 
             <div className="flex w-fit md:items-center items-start flex-col md:flex-row space-x-2">
               <input
                 type="date"
-                value={barChartStartDate}
-                onChange={(e) => setBarChartStartDate(e.target.value)}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
               />
               <span className="text-center w-full text-gray-500">-</span>
               <input
                 type="date"
-                value={barChartEndDate}
-                onChange={(e) => setBarChartEndDate(e.target.value)}
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200"
               />
             </div>
@@ -334,11 +339,11 @@ const RevenueDashboard: FC = () => {
         </div>
 
         <div className="h-80 w-full">
-          {isLoading ? (
+          {isLoadingPeriod ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
-          ) : (
+          ) : hasRevenueData ? (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={barChartData}
@@ -374,6 +379,14 @@ const RevenueDashboard: FC = () => {
                 />
               </BarChart>
             </ResponsiveContainer>
+          ) : (
+            <EmptyState
+              title="Không có dữ liệu doanh thu"
+              description="Hiện tại chưa có dữ liệu doanh thu trong khoảng thời gian đã chọn. Hãy thử chọn khoảng thời gian khác hoặc kiểm tra lại dữ liệu."
+              icon={<FiBarChart2 className="w-8 h-8 text-gray-400" />}
+              actionText="Thử lại"
+              onAction={refetchPeriod}
+            />
           )}
         </div>
       </div>
@@ -390,284 +403,163 @@ const RevenueDashboard: FC = () => {
             </h2>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <FiCalendar className="w-4 h-4 text-gray-500" />
-            <input
-              type="month"
-              value={pieChartMonth}
-              onChange={(e) => setPieChartMonth(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200"
-            />
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <FiCalendar className="w-4 h-4 text-gray-500" />
+              <input
+                type="month"
+                value={pieChartMonth}
+                onChange={(e) => setPieChartMonth(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all duration-200"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {hasCategoryData ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="h-80">
+              {isLoadingCategory ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieChartData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {pieChartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value: number) => [`${value}%`, "Tỷ lệ"]}
+                      contentStyle={{
+                        backgroundColor: "white",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Chi Tiết Danh Mục
+              </h3>
+              {pieChartData.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    <span className="text-sm font-medium text-gray-700">
+                      {item.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-bold text-gray-900">
+                      {item.value}%
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatCurrency(item.revenue)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
           <div className="h-80">
-            {isLoading ? (
+            {isLoadingCategory ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={displayedPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={120}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {displayedPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number) => [`${value}%`, "Tỷ lệ"]}
-                    contentStyle={{
-                      backgroundColor: "white",
-                      border: "1px solid #e2e8f0",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <EmptyState
+                title="Không có dữ liệu danh mục"
+                description="Chưa có dữ liệu doanh thu theo danh mục trong tháng đã chọn. Hãy thử chọn tháng khác hoặc kiểm tra lại dữ liệu sản phẩm."
+                icon={<FiPackage className="w-8 h-8 text-gray-400" />}
+                actionText="Thử lại"
+                onAction={refetchCategory}
+              />
             )}
           </div>
-
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Chi Tiết Danh Mục
-            </h3>
-            {displayedPieData.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-              >
-                <div className="flex items-center space-x-3">
-                  <div
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  ></div>
-                  <span className="text-sm font-medium text-gray-700">
-                    {item.name}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-bold text-gray-900">
-                    {item.value}%
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatCurrency(totalRevenue * (item.value / 100))}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Footer - Additional Management Information */}
+      {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="p-2 bg-indigo-100 rounded-lg">
-            <FiTrendingUp className="w-5 h-5 text-indigo-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Thông Tin Quản Lý Bổ Sung
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          {/* Revenue Growth */}
-          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-blue-800">
-                Tăng Trưởng Doanh Thu
-              </h3>
-              <BsArrowUpRight className="w-4 h-4 text-blue-600" />
-            </div>
-            <p className="text-2xl font-bold text-blue-900">+18.5%</p>
-            <p className="text-xs text-blue-600 mt-1">
-              So với cùng kỳ năm trước
-            </p>
-          </div>
-
-          {/* Best Selling Day */}
-          <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-green-800">
-                Ngày Bán Chạy Nhất
-              </h3>
-              <FiCalendar className="w-4 h-4 text-green-600" />
-            </div>
-            <p className="text-lg font-bold text-green-900">Thứ 6</p>
-            <p className="text-xs text-green-600 mt-1">
-              {formatCurrency(125000)} trung bình
-            </p>
-          </div>
-
-          {/* Customer Acquisition */}
-          <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-purple-800">
-                Khách Hàng Mới
-              </h3>
-              <FiTrendingUp className="w-4 h-4 text-purple-600" />
-            </div>
-            <p className="text-2xl font-bold text-purple-900">+247</p>
-            <p className="text-xs text-purple-600 mt-1">Trong tháng này</p>
-          </div>
-
-          {/* Return Rate */}
-          <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-orange-800">
-                Tỷ Lệ Trả Hàng
-              </h3>
-              <FiBarChart2 className="w-4 h-4 text-orange-600" />
-            </div>
-            <p className="text-2xl font-bold text-orange-900">2.3%</p>
-            <p className="text-xs text-orange-600 mt-1">
-              Giảm 0.5% so với tháng trước
-            </p>
-          </div>
-        </div>
-
-        {/* Key Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              📊 Thông Tin Chi Tiết
-            </h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
-                  Doanh thu cao nhất trong ngày:
-                </span>
-                <span className="font-semibold text-gray-900">
-                  {formatCurrency(180000)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">
-                  Số đơn hàng nhiều nhất/ngày:
-                </span>
-                <span className="font-semibold text-gray-900">156 đơn</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Thời gian peak:</span>
-                <span className="font-semibold text-gray-900">
-                  14:00 - 16:00
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Tỷ lệ chuyển đổi:</span>
-                <span className="font-semibold text-green-600">3.2%</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              🎯 Mục Tiêu & Hiệu Suất
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600">Mục tiêu tháng:</span>
-                  <span className="text-sm font-semibold text-gray-900">
-                    85%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-600 h-2 rounded-full"
-                    style={{ width: "85%" }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600">
-                    Khách hàng quay lại:
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">
-                    68%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-green-600 h-2 rounded-full"
-                    style={{ width: "68%" }}
-                  ></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm text-gray-600">
-                    Hiệu suất nhân viên:
-                  </span>
-                  <span className="text-sm font-semibold text-gray-900">
-                    92%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-purple-600 h-2 rounded-full"
-                    style={{ width: "92%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="border-t border-gray-200 pt-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            🚀 Hành Động Nhanh
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg transition-colors duration-200">
-              <FiDollarSign className="w-4 h-4" />
-              <span className="text-sm font-medium">Xuất Báo Cáo</span>
-            </button>
-            <button className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg transition-colors duration-200">
-              <FiTrendingUp className="w-4 h-4" />
-              <span className="text-sm font-medium">Phân Tích Xu Hướng</span>
-            </button>
-            <button className="flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg transition-colors duration-200">
-              <FiPieChart className="w-4 h-4" />
-              <span className="text-sm font-medium">So Sánh Kỳ</span>
-            </button>
-            <button className="flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors duration-200">
-              <FiCalendar className="w-4 h-4" />
-              <span className="text-sm font-medium">Lên Kế Hoạch</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="border-t border-gray-200 pt-4 mt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-            <div className="flex items-center space-x-4">
-              <span>
-                Cập nhật lần cuối: {new Date().toLocaleString("vi-VN")}
-              </span>
-              <span>•</span>
-              <span>Dữ liệu đồng bộ: Thời gian thực</span>
-            </div>
-            <div className="flex items-center space-x-4 mt-2 md:mt-0">
-              <span>Phiên bản: 2.1.0</span>
-              <span>•</span>
-              <span>© 2024 Revenue Management System</span>
-            </div>
-          </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          🚀 Hành Động Nhanh
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <button
+            className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-colors duration-200 ${
+              hasRevenueData || hasCategoryData
+                ? "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+            disabled={!hasRevenueData && !hasCategoryData}
+          >
+            <FiDollarSign className="w-4 h-4" />
+            <span className="text-sm font-medium">Xuất Báo Cáo</span>
+          </button>
+          <button
+            className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-colors duration-200 ${
+              hasRevenueData
+                ? "bg-green-600 hover:bg-green-700 text-white"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+            disabled={!hasRevenueData}
+          >
+            <FiTrendingUp className="w-4 h-4" />
+            <span className="text-sm font-medium">Phân Tích Xu Hướng</span>
+          </button>
+          <button
+            className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-colors duration-200 ${
+              hasRevenueData
+                ? "bg-purple-600 hover:bg-purple-700 text-white"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+            disabled={!hasRevenueData}
+          >
+            <FiPieChart className="w-4 h-4" />
+            <span className="text-sm font-medium">So Sánh Kỳ</span>
+          </button>
+          <button className="flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg transition-colors duration-200">
+            <FiCalendar className="w-4 h-4" />
+            <span className="text-sm font-medium">Lên Kế Hoạch</span>
+          </button>
         </div>
       </div>
+
+      {/* Overall Empty State - when both charts have no data */}
+      {!hasRevenueData && !hasCategoryData && !isLoading && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+          <EmptyState
+            title="Chưa có dữ liệu thống kê"
+            description="Hiện tại hệ thống chưa có dữ liệu doanh thu nào. Điều này có thể do chưa có giao dịch nào được thực hiện hoặc dữ liệu đang được xử lý. Hãy thử lại sau hoặc liên hệ với quản trị viên nếu vấn đề vẫn tiếp tục."
+            icon={<FiAlertCircle className="w-12 h-12 text-gray-400" />}
+            actionText="Làm mới dữ liệu"
+            onAction={handleRefresh}
+          />
+        </div>
+      )}
     </div>
   );
 };
