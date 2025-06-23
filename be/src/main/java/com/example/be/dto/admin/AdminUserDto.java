@@ -29,7 +29,7 @@ public class AdminUserDto {
     private LocalDateTime updatedAt;
     private UserStatus status;
     private Set<Role> roles;
-    private SellerProfileDto sellerProfile;
+//    private SellerProfileDto sellerProfile;
     private Integer totalOrders;
     private Double totalSpent;
 }

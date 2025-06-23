@@ -1,6 +1,7 @@
-package com.example.be.controller;
+package com.example.be.controllers;
 
 import com.example.be.Utils;
+import com.example.be.dto.admin.AdminOrderAnalyticsDto;
 import com.example.be.dto.admin.AdminOrderDto;
 import com.example.be.dto.admin.UpdateOrderStatusDto;
 import com.example.be.enums.OrderStatus;
@@ -94,15 +95,14 @@ public class AdminOrderController {
         return ResponseEntity.ok().build();
     }
 
-//    @Operation(
-//        summary = "Thống kê doanh thu theo tháng",
-//        description = "Lấy dữ liệu doanh thu trong khoảng thời gian"
-//    )
-//    @GetMapping("/analytics")
-//    public ResponseEntity<ApiResponse<AdminOrderAnalyticsDto>> getOrderAnalytics(
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-//            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-//        AdminOrderAnalyticsDto analytics = adminFacadeService.getMonthlySales(startDate, endDate);
-//        return ResponseEntity.ok(ApiResponse.success("Order analytics fetched successfully", analytics));
-//    }
+    @Operation(
+        summary = "Thống kê doanh thu theo tháng",
+        description = "Lấy dữ liệu doanh thu trong khoảng thời gian"
+    )
+    @GetMapping("/analytics")
+    public ResponseEntity<AdminOrderAnalyticsDto> getOrderAnalytics(
+           ) {
+        AdminOrderAnalyticsDto analytics = adminFacadeService.getOrderAnalytic();
+        return ResponseEntity.ok(analytics);
+    }
 }

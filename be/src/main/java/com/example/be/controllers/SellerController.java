@@ -1,4 +1,4 @@
-package com.example.be.controller;
+package com.example.be.controllers;
 
 import com.example.be.dto.seller.SellerDashboardDto;
 import com.example.be.dto.seller.SellerProfileDto;

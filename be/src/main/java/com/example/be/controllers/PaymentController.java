@@ -24,7 +24,7 @@ public class PaymentController {
     private final VNPAYService vnPayService;
     private final SecurityService securityService;
     private final UserFacadeService userFacadeService;
-    //    private static final String ORDER_ID_PREFIX = "VNPAY-ODR-";
+    //    private static final String ORDER_ID_PREFIX = "VNPAY-ORD-";
     private static final String ORDER_ID_PREFIX = "VNPAY-ODR-TESTING-";
 
     @PostMapping
@@ -66,7 +66,7 @@ public class PaymentController {
             body.put("message", "Thanh toán thành công");
             body.put("transactionRef", params.get("vnp_TxnRef"));
             body.put("amount", params.get("vnp_Amount"));
-            userFacadeService.updateOrderStatus(userId, orderId, UpdateOrderStatusDto.builder().paymentStatus(PaymentStatus.PAID).status(OrderStatus.COMPLETED).build());
+            userFacadeService.updateOrderStatus(userId, orderId, UpdateOrderStatusDto.builder().paymentStatus(PaymentStatus.PAID).status(OrderStatus.COMPLETED).build(),ORDER_ID_PREFIX);
         } else {
             body.put("status", "failed");
             body.put("message", "Thanh toán không thành công");

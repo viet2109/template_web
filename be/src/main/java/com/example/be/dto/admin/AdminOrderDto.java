@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 public class AdminOrderDto {
     private Long id;
-    private UserBasicDto user;
+    private UserAdminBasicDto user;
     private Double taxAmount;
     private String currency;
     private OrderStatus status;

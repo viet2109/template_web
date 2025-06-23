@@ -1,4 +1,4 @@
-package com.example.be.controller;
+package com.example.be.controllers;
 
 import com.example.be.dto.user.SiteStatsDto;
 import com.example.be.dto.user.TemplateCardDto;
@@ -7,7 +7,6 @@ import com.example.be.services.SecurityService;
 import com.example.be.services.facade.PublicFacadeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

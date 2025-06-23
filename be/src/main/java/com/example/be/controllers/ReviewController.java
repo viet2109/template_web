@@ -1,4 +1,4 @@
-package com.example.be.controller;
+package com.example.be.controllers;
 
 import com.example.be.dto.user.CreateReviewDto;
 import com.example.be.dto.user.ReviewDto;

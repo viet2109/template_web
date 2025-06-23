@@ -2,21 +2,14 @@ import React, { useEffect, useState } from "react";
 import {
   FiBarChart2,
   FiChevronDown,
-  FiDollarSign,
-  FiDownload,
   FiEdit,
-  FiEye,
-  FiFileText,
   FiGrid,
   FiHelpCircle,
   FiHome,
   FiLogOut,
   FiMenu,
-  FiPackage,
   FiSettings,
   FiShoppingBag,
-  FiStar,
-  FiTrendingUp,
   FiUsers,
   FiX
 } from "react-icons/fi";
@@ -63,41 +56,18 @@ const AdminSidebar: React.FC = () => {
       id: "templates",
       label: "Quản lý Template",
       icon: <FiGrid size={20} />,
-      badge: "248",
       path: routers.adminTemplates,
     },
     {
       id: "orders",
       label: "Quản lý Đơn hàng",
       icon: <FiShoppingBag size={20} />,
-      badge: "12",
       path: routers.adminOrders,
-      submenu: [
-        {
-          id: "all-orders",
-          label: "Tất cả đơn hàng",
-          icon: <FiFileText size={16} />,
-          path: "/orders/all",
-        },
-        {
-          id: "pending-orders",
-          label: "Chờ xử lý",
-          icon: <FiPackage size={16} />,
-          path: "/orders/pending",
-        },
-        {
-          id: "completed-orders",
-          label: "Hoàn thành",
-          icon: <FiDownload size={16} />,
-          path: "/orders/completed",
-        },
-      ],
     },
     {
       id: "users",
       label: "Quản lý Người dùng",
       icon: <FiUsers size={20} />,
-      badge: "1.2k",
       path: routers.adminUsers,
       submenu: [
         {
@@ -120,7 +90,6 @@ const AdminSidebar: React.FC = () => {
       label: "Thống kê & Báo cáo",
       icon: <FiBarChart2 size={20} />,
       path: routers.analytics,
-      
     },
   ];
 

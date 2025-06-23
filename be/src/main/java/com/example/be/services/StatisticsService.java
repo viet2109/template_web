@@ -28,12 +28,10 @@ public class StatisticsService {
             case MONTHLY -> "%Y-%m";
             case YEARLY -> "%Y";
         };
-//        return orderDao.findRevenueByPeriod(start.atStartOfDay(), end.plusDays(1).atStartOfDay(), pattern, sellerId);
-        return null;
+        return orderDao.findRevenueByPeriod(start.atStartOfDay(), end.plusDays(1).atStartOfDay(), pattern, sellerId);
     }
 
     public List<RevenueByCategoryDto> getRevenueByCategory(LocalDate start, LocalDate end, Long sellerId) {
-//        return orderDao.findRevenueByCategory(start.atStartOfDay(), end.atStartOfDay(), sellerId);
-        return null;
+        return orderDao.findRevenueByCategory(start.atStartOfDay(), end.atStartOfDay(), sellerId);
     }
 }

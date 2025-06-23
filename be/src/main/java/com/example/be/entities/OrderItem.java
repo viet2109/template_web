@@ -46,7 +46,8 @@ public class OrderItem {
 
     // Tỉ lệ hoa hồng (phần trăm) hướng tới seller
     @Column(nullable = false, precision = 5, scale = 2)
-    private BigDecimal commissionRate;
+    @Builder.Default
+    private BigDecimal commissionRate = BigDecimal.valueOf(30);
 
     // Thời điểm item này được thêm vào đơn hàng
     @CreationTimestamp

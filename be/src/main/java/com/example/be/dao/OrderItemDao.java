@@ -28,7 +28,7 @@ public interface OrderItemDao extends CrudRepository<OrderItem, Long> {
     );
 
     @Query("""
-              SELECT COALESCE(SUM(oi.price), 0)
+              SELECT COALESCE(SUM(oi.price * (100 - oi.commissionRate) / 100), 0)
                 FROM OrderItem oi
                 JOIN oi.order o
                WHERE o.status = :status
@@ -36,7 +36,7 @@ public interface OrderItemDao extends CrudRepository<OrderItem, Long> {
     BigDecimal totalRevenue(@Param("status") OrderStatus status);
 
     @Query("""
-              SELECT COALESCE(SUM(oi.price), 0)
+              SELECT COALESCE(SUM(oi.price * (100 - oi.commissionRate) / 100), 0)
                 FROM OrderItem oi
                 JOIN oi.order o
                WHERE o.status = :status AND oi.template.category = :category
@@ -45,7 +45,7 @@ public interface OrderItemDao extends CrudRepository<OrderItem, Long> {
 
     @Query("""
               SELECT COALESCE(
-                SUM(oi.price * oi.commissionRate / 100),
+                SUM(oi.price * (100 - oi.commissionRate) / 100),
                 0
               )
               FROM OrderItem oi

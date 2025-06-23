@@ -1,14 +1,7 @@
-package com.example.be.controller;
+package com.example.be.controllers;
 
-import com.example.be.dto.user.UserProfileDto;
-import com.example.be.dto.user.UserRegisterDto;
-import com.example.be.services.facade.PublicFacadeService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

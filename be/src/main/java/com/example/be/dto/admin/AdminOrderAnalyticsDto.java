@@ -11,8 +11,9 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class MonthlySalesDto {
-    private String monthDto;
-    private Long totalSales;
-    private BigDecimal totalRevenue;
+public class AdminOrderAnalyticsDto {
+    private Integer totalOrders;
+    private Integer totalCompletedOrders;
+    private Integer totalPendingOrders;
+    private BigDecimal revenue;
 }

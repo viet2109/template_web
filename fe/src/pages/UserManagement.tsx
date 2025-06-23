@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import React, { useMemo, useState } from "react";
 import {
   FiActivity,
   FiAlertTriangle,
@@ -15,218 +16,112 @@ import {
   FiUserCheck,
   FiUsers,
   FiUserX,
-  FiX
+  FiX,
 } from "react-icons/fi";
 import {
   HiOutlineCheckBadge,
   HiOutlineExclamationTriangle,
-  HiOutlineShieldCheck,
   HiOutlineUserGroup,
 } from "react-icons/hi2";
-
-// Define User interface
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  role: "admin" | "user";
-  status: "active" | "inactive" | "pending" | "suspended";
-  avatar: string;
-  joinDate: string;
-  lastLogin: string;
-  totalPurchases: number;
-  totalSpent: number;
-  isVerified: boolean;
-  location: string;
-}
-
-// Mock data
-const mockUsers: User[] = [
-  {
-    id: 1,
-    name: "Nguyễn Văn An",
-    email: "nguyenvanan@gmail.com",
-    phone: "0901234567",
-    role: "user",
-    status: "active",
-    avatar:
-      "https://ui-avatars.com/api/?name=Nguyen+Van+An&background=3b82f6&color=fff",
-    joinDate: "2024-01-15",
-    lastLogin: "2024-06-02T14:30:00",
-    totalPurchases: 5,
-    totalSpent: 1250000,
-    isVerified: true,
-    location: "Hồ Chí Minh",
-  },
-  {
-    id: 2,
-    name: "Trần Thị Bình",
-    email: "tranthibinh@gmail.com",
-    phone: "0912345678",
-    role: "user",
-    status: "active",
-    avatar:
-      "https://ui-avatars.com/api/?name=Tran+Thi+Binh&background=10b981&color=fff",
-    joinDate: "2024-02-20",
-    lastLogin: "2024-06-03T09:15:00",
-    totalPurchases: 12,
-    totalSpent: 3450000,
-    isVerified: true,
-    location: "Hà Nội",
-  },
-  {
-    id: 3,
-    name: "Lê Minh Cường",
-    email: "leminhcuong@gmail.com",
-    phone: "0923456789",
-    role: "admin",
-    status: "active",
-    avatar:
-      "https://ui-avatars.com/api/?name=Le+Minh+Cuong&background=8b5cf6&color=fff",
-    joinDate: "2023-12-01",
-    lastLogin: "2024-06-03T16:45:00",
-    totalPurchases: 0,
-    totalSpent: 0,
-    isVerified: true,
-    location: "Đà Nẵng",
-  },
-  {
-    id: 4,
-    name: "Phạm Thị Dung",
-    email: "phamthidung@gmail.com",
-    phone: "0934567890",
-    role: "user",
-    status: "inactive",
-    avatar:
-      "https://ui-avatars.com/api/?name=Pham+Thi+Dung&background=f59e0b&color=fff",
-    joinDate: "2024-03-10",
-    lastLogin: "2024-05-15T11:20:00",
-    totalPurchases: 2,
-    totalSpent: 480000,
-    isVerified: false,
-    location: "Cần Thơ",
-  },
-  {
-    id: 5,
-    name: "Hoàng Văn Em",
-    email: "hoangvanem@gmail.com",
-    phone: "0945678901",
-    role: "user",
-    status: "pending",
-    avatar:
-      "https://ui-avatars.com/api/?name=Hoang+Van+Em&background=ef4444&color=fff",
-    joinDate: "2024-05-25",
-    lastLogin: "2024-06-01T08:30:00",
-    totalPurchases: 0,
-    totalSpent: 0,
-    isVerified: false,
-    location: "Hải Phòng",
-  },
-  {
-    id: 6,
-    name: "Vũ Thị Phương",
-    email: "vuthiphuong@gmail.com",
-    phone: "0956789012",
-    role: "user",
-    status: "active",
-    avatar:
-      "https://ui-avatars.com/api/?name=Vu+Thi+Phuong&background=06b6d4&color=fff",
-    joinDate: "2024-04-08",
-    lastLogin: "2024-06-03T13:00:00",
-    totalPurchases: 8,
-    totalSpent: 2100000,
-    isVerified: true,
-    location: "Bình Dương",
-  },
-  {
-    id: 7,
-    name: "Đỗ Minh Quân",
-    email: "dominhquan@gmail.com",
-    phone: "0967890123",
-    role: "user",
-    status: "active",
-    avatar:
-      "https://ui-avatars.com/api/?name=Do+Minh+Quan&background=84cc16&color=fff",
-    joinDate: "2024-01-22",
-    lastLogin: "2024-06-02T19:45:00",
-    totalPurchases: 15,
-    totalSpent: 4200000,
-    isVerified: true,
-    location: "Vũng Tàu",
-  },
-  {
-    id: 8,
-    name: "Ngô Thị Hương",
-    email: "ngothihuong@gmail.com",
-    phone: "0978901234",
-    role: "user",
-    status: "suspended",
-    avatar:
-      "https://ui-avatars.com/api/?name=Ngo+Thi+Huong&background=f97316&color=fff",
-    joinDate: "2024-02-14",
-    lastLogin: "2024-05-28T15:20:00",
-    totalPurchases: 3,
-    totalSpent: 720000,
-    isVerified: false,
-    location: "Nha Trang",
-  },
-];
+import { MdPendingActions } from "react-icons/md"
+import { fetchAdminUsers, GetUsersParams } from "../api/adminUser";
+import { AdminUserDto, AuthProvider, Role, UserStatus } from "../types";
 
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedRole, setSelectedRole] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedRole, setSelectedRole] = useState<Role | "all">("all");
+  const [selectedStatus, setSelectedStatus] = useState<UserStatus | "all">(
+    "all"
+  );
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [showUserModal, setShowUserModal] = useState<boolean>(false);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<AdminUserDto | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     type: "single" | "bulk";
     userId?: number;
     count?: number;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
-  const [editFormData, setEditFormData] = useState<Partial<User>>({});
+  const [editFormData, setEditFormData] = useState<Partial<AdminUserDto>>({});
 
-  // Stats calculation
-  const stats = {
-    total: users.length,
-    active: users.filter((u) => u.status === "active").length,
-    inactive: users.filter((u) => u.status === "inactive").length,
-    pending: users.filter((u) => u.status === "pending").length,
-    suspended: users.filter((u) => u.status === "suspended").length,
-    users: users.filter((u) => u.role === "user").length,
-    admins: users.filter((u) => u.role === "admin").length,
-    verified: users.filter((u) => u.isVerified).length,
-  };
-
-  // Filter and search logic
-  useEffect(() => {
-    let filtered: User[] = users;
+  // Build query params
+  const queryParams: GetUsersParams = useMemo(() => {
+    const params: GetUsersParams = {
+      size: 20,
+    };
 
     if (searchTerm) {
-      filtered = filtered.filter(
-        (user) =>
-          user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.phone.includes(searchTerm)
-      );
+      if (searchTerm.includes("@")) {
+        params.email = searchTerm;
+      } else {
+        params.name = searchTerm;
+      }
     }
 
     if (selectedRole !== "all") {
-      filtered = filtered.filter((user) => user.role === selectedRole);
+      params.role = selectedRole;
     }
 
-    if (selectedStatus !== "all") {
-      filtered = filtered.filter((user) => user.status === selectedStatus);
-    }
+    return params;
+  }, [searchTerm, selectedRole]);
 
-    setFilteredUsers(filtered);
-  }, [searchTerm, selectedRole, selectedStatus, users]);
+  // Infinite query for users
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["admin-users", queryParams],
+    queryFn: ({ pageParam = 0 }) =>
+      fetchAdminUsers({ ...queryParams, page: pageParam }),
+    getNextPageParam: (lastPage) => {
+      if (lastPage.page.number < lastPage.page.totalPages - 1) {
+        return lastPage.page.number + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 0,
+  });
+
+  // Flatten all users from all pages
+  const allUsers = useMemo(() => {
+    return data?.pages.flatMap((page) => page.content) || [];
+  }, [data]);
+
+  // Filter users by status (client-side filtering for status since API doesn't support it)
+  const filteredUsers = useMemo(() => {
+    if (selectedStatus === "all") {
+      return allUsers;
+    }
+    return allUsers.filter((user) => user.status === selectedStatus);
+  }, [allUsers, selectedStatus]);
+
+  // Stats calculation
+  const stats = useMemo(() => {
+    const totalFromLastPage =
+      data?.pages[data.pages.length - 1]?.page.totalElements || 0;
+    return {
+      total: totalFromLastPage,
+      active: filteredUsers.filter((u) => u.status === UserStatus.ACTIVE)
+        .length,
+      pending: filteredUsers.filter((u) => u.status === UserStatus.PENDING)
+        .length,
+      suspended: filteredUsers.filter((u) => u.status === UserStatus.SUSPENDED)
+        .length,
+      disabled: filteredUsers.filter((u) => u.status === UserStatus.DISABLED)
+        .length,
+      users: filteredUsers.filter((u) => u.roles.includes(Role.USER)).length,
+      admins: filteredUsers.filter((u) => u.roles.includes(Role.ADMIN)).length,
+      sellers: filteredUsers.filter((u) => u.roles.includes(Role.SELLER))
+        .length,
+    };
+  }, [filteredUsers, data]);
 
   const handleSelectUser = (userId: number): void => {
     setSelectedUsers((prev) =>
@@ -254,121 +149,107 @@ const UserManagement: React.FC = () => {
   };
 
   const handleDeleteConfirm = (): void => {
-    if (deleteTarget?.type === "single" && deleteTarget.userId) {
-      setUsers((prev) =>
-        prev.filter((user) => user.id !== deleteTarget.userId)
-      );
-    } else if (deleteTarget?.type === "bulk") {
-      setUsers((prev) =>
-        prev.filter((user) => !selectedUsers.includes(user.id))
-      );
-      setSelectedUsers([]);
-    }
+    // TODO: Implement actual delete API calls
+    console.log("Delete users:", deleteTarget);
     setShowDeleteModal(false);
     setDeleteTarget(null);
-  };
-
-  const handleUpdateUserStatus = (userId: number, newStatus: string): void => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        user.id === userId
-          ? {
-              ...user,
-              status: newStatus as
-                | "active"
-                | "inactive"
-                | "pending"
-                | "suspended",
-            }
-          : user
-      )
-    );
-  };
-
-  const handleBulkStatusUpdate = (newStatus: string): void => {
-    setUsers((prev) =>
-      prev.map((user) =>
-        selectedUsers.includes(user.id)
-          ? {
-              ...user,
-              status: newStatus as
-                | "active"
-                | "inactive"
-                | "pending"
-                | "suspended",
-            }
-          : user
-      )
-    );
     setSelectedUsers([]);
+    refetch();
   };
 
-  const handleEditUser = (user: User): void => {
+  const handleUpdateUserStatus = (
+    userId: number,
+    newStatus: UserStatus
+  ): void => {
+    // TODO: Implement actual status update API call
+    console.log("Update user status:", userId, newStatus);
+    refetch();
+  };
+
+  const handleBulkStatusUpdate = (newStatus: UserStatus): void => {
+    // TODO: Implement bulk status update API call
+    console.log("Bulk update status:", selectedUsers, newStatus);
+    setSelectedUsers([]);
+    refetch();
+  };
+
+  const handleEditUser = (user: AdminUserDto): void => {
     setCurrentUser(user);
     setEditFormData({
-      name: user.name,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       phone: user.phone,
-      role: user.role,
       status: user.status,
-      location: user.location,
-      isVerified: user.isVerified,
+      roles: user.roles,
     });
     setShowUserModal(true);
   };
 
   const handleSaveUser = (): void => {
     if (currentUser && editFormData) {
-      setUsers((prev) =>
-        prev.map((user) =>
-          user.id === currentUser.id ? { ...user, ...editFormData } : user
-        )
-      );
+      // TODO: Implement actual update API call
+      console.log("Update user:", currentUser.id, editFormData);
       setShowUserModal(false);
       setCurrentUser(null);
       setEditFormData({});
+      refetch();
     }
   };
 
   const handleAddUser = (formData: any): void => {
-    const newUser: User = {
-      id: Math.max(...users.map((u) => u.id)) + 1,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      role: formData.role,
-      status: "pending",
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        formData.name
-      )}&background=3b82f6&color=fff`,
-      joinDate: new Date().toISOString().split("T")[0],
-      lastLogin: new Date().toISOString(),
-      totalPurchases: 0,
-      totalSpent: 0,
-      isVerified: false,
-      location: formData.location || "Chưa cập nhật",
-    };
-    setUsers((prev) => [...prev, newUser]);
+    // TODO: Implement actual create user API call
+    console.log("Create user:", formData);
     setShowUserModal(false);
     setEditFormData({});
+    refetch();
   };
 
-  const getRoleBadge = (role: string): string => {
-    const badges: { [key: string]: string } = {
-      admin: "bg-purple-100 text-purple-800 border-purple-200",
-      user: "bg-blue-100 text-blue-800 border-blue-200",
-    };
-    return badges[role] || badges.user;
+  const getRoleBadge = (roles: Role): string => {
+    if (roles === Role.ADMIN) {
+      return "bg-purple-100 text-purple-800 border-purple-200";
+    }
+    if (roles === Role.SELLER) {
+      return "bg-green-100 text-green-800 border-green-200";
+    }
+    return "bg-blue-100 text-blue-800 border-blue-200";
   };
 
-  const getStatusBadge = (status: string): string => {
-    const badges: { [key: string]: string } = {
-      active: "bg-green-100 text-green-800",
-      inactive: "bg-gray-100 text-gray-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      suspended: "bg-red-100 text-red-800",
+  const getRoleLabel = (roles: Role): string => {
+    if (roles === Role.ADMIN) return "Admin";
+    if (roles === Role.SELLER) return "Seller";
+    return "User";
+  };
+
+  const getStatusBadge = (status: UserStatus): string => {
+    const badges: { [key in UserStatus]: string } = {
+      [UserStatus.ACTIVE]: "bg-green-100 text-green-800",
+      [UserStatus.PENDING]: "bg-yellow-100 text-yellow-800",
+      [UserStatus.SUSPENDED]: "bg-red-100 text-red-800",
+      [UserStatus.DISABLED]: "bg-gray-100 text-gray-800",
+      [UserStatus.DELETED]: "bg-red-200 text-red-900",
     };
-    return badges[status] || badges.active;
+    return badges[status] || badges[UserStatus.ACTIVE];
+  };
+
+  const getStatusLabel = (status: UserStatus): string => {
+    const labels: { [key in UserStatus]: string } = {
+      [UserStatus.ACTIVE]: "Hoạt động",
+      [UserStatus.PENDING]: "Chờ duyệt",
+      [UserStatus.SUSPENDED]: "Tạm khóa",
+      [UserStatus.DISABLED]: "Vô hiệu hóa",
+      [UserStatus.DELETED]: "Đã xóa",
+    };
+    return labels[status] || "Không xác định";
+  };
+
+  const getProviderLabel = (provider: AuthProvider): string => {
+    const labels: { [key in AuthProvider]: string } = {
+      [AuthProvider.LOCAL]: "Tài khoản thường",
+      [AuthProvider.GOOGLE]: "Google",
+      [AuthProvider.FACEBOOK]: "Facebook",
+    };
+    return labels[provider] || "Không xác định";
   };
 
   const formatCurrency = (amount: number): string => {
@@ -376,6 +257,10 @@ const UserManagement: React.FC = () => {
       style: "currency",
       currency: "VND",
     }).format(amount);
+  };
+
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
   const formatLastLogin = (dateString: string): string => {
@@ -467,21 +352,20 @@ const UserManagement: React.FC = () => {
               <div className="space-y-6">
                 {/* User Avatar and Basic Info */}
                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                  <img
-                    src={currentUser.avatar}
-                    alt={currentUser.name}
-                    className="w-16 h-16 rounded-full border-4 border-white shadow-sm"
-                  />
+                  <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                    {currentUser.firstName[0]}
+                    {currentUser.lastName[0]}
+                  </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {currentUser.name}
+                      {currentUser.firstName} {currentUser.lastName}
                     </h3>
                     <p className="text-gray-600">{currentUser.email}</p>
                     <p className="text-sm text-gray-500">
-                      Tham gia:{" "}
-                      {new Date(currentUser.joinDate).toLocaleDateString(
-                        "vi-VN"
-                      )}
+                      Tham gia: {formatDate(currentUser.createdAt)}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {getProviderLabel(currentUser.provider)}
                     </p>
                   </div>
                 </div>
@@ -490,15 +374,31 @@ const UserManagement: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Họ và tên
+                      Họ
                     </label>
                     <input
                       type="text"
-                      value={editFormData.name || ""}
+                      value={editFormData.firstName || ""}
                       onChange={(e) =>
                         setEditFormData((prev) => ({
                           ...prev,
-                          name: e.target.value,
+                          firstName: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tên
+                    </label>
+                    <input
+                      type="text"
+                      value={editFormData.lastName || ""}
+                      onChange={(e) =>
+                        setEditFormData((prev) => ({
+                          ...prev,
+                          lastName: e.target.value,
                         }))
                       }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
@@ -538,40 +438,6 @@ const UserManagement: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Khu vực
-                    </label>
-                    <input
-                      type="text"
-                      value={editFormData.location || ""}
-                      onChange={(e) =>
-                        setEditFormData((prev) => ({
-                          ...prev,
-                          location: e.target.value,
-                        }))
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Vai trò
-                    </label>
-                    <select
-                      value={editFormData.role || ""}
-                      onChange={(e) =>
-                        setEditFormData((prev) => ({
-                          ...prev,
-                          role: e.target.value as "admin" | "user",
-                        }))
-                      }
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Trạng thái
                     </label>
                     <select
@@ -579,54 +445,24 @@ const UserManagement: React.FC = () => {
                       onChange={(e) =>
                         setEditFormData((prev) => ({
                           ...prev,
-                          status: e.target.value as
-                            | "active"
-                            | "inactive"
-                            | "pending"
-                            | "suspended",
+                          status: e.target.value as UserStatus,
                         }))
                       }
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                     >
-                      <option value="active">Hoạt động</option>
-                      <option value="inactive">Không hoạt động</option>
-                      <option value="pending">Chờ duyệt</option>
-                      <option value="suspended">Tạm khóa</option>
+                      <option value={UserStatus.ACTIVE}>Hoạt động</option>
+                      <option value={UserStatus.PENDING}>Chờ duyệt</option>
+                      <option value={UserStatus.SUSPENDED}>Tạm khóa</option>
+                      <option value={UserStatus.DISABLED}>Vô hiệu hóa</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Verification Toggle */}
-                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      Trạng thái xác thực
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Người dùng đã xác thực email và số điện thoại
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editFormData.isVerified || false}
-                      onChange={(e) =>
-                        setEditFormData((prev) => ({
-                          ...prev,
-                          isVerified: e.target.checked,
-                        }))
-                      }
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
-                </div>
-
                 {/* Activity Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-blue-600">
-                      {currentUser.totalPurchases}
+                      {currentUser.totalOrders}
                     </p>
                     <p className="text-sm text-gray-600">Đơn hàng</p>
                   </div>
@@ -635,12 +471,6 @@ const UserManagement: React.FC = () => {
                       {formatCurrency(currentUser.totalSpent)}
                     </p>
                     <p className="text-sm text-gray-600">Tổng chi tiêu</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">
-                      {formatLastLogin(currentUser.lastLogin)}
-                    </p>
-                    <p className="text-sm text-gray-600">Truy cập cuối</p>
                   </div>
                 </div>
 
@@ -680,19 +510,25 @@ const UserManagement: React.FC = () => {
                   e.preventDefault();
                   const formData = new FormData(e.target as HTMLFormElement);
                   handleAddUser({
-                    name: formData.get("name"),
+                    firstName: formData.get("firstName"),
+                    lastName: formData.get("lastName"),
                     email: formData.get("email"),
                     phone: formData.get("phone"),
-                    role: formData.get("role"),
-                    location: formData.get("location"),
                   });
                 }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input
-                    name="name"
+                    name="firstName"
                     type="text"
-                    placeholder="Họ và tên"
+                    placeholder="Họ"
+                    required
+                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  />
+                  <input
+                    name="lastName"
+                    type="text"
+                    placeholder="Tên"
                     required
                     className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
@@ -707,22 +543,8 @@ const UserManagement: React.FC = () => {
                     name="phone"
                     type="tel"
                     placeholder="Số điện thoại"
-                    required
                     className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                   />
-                  <input
-                    name="location"
-                    type="text"
-                    placeholder="Khu vực"
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
-                  <select
-                    name="role"
-                    className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 md:col-span-2"
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
@@ -747,8 +569,32 @@ const UserManagement: React.FC = () => {
     );
   };
 
+  if (isError) {
+    return (
+      <div className="p-4 m-6 rounded-lg lg:p-6 bg-white">
+        <div className="text-center py-8">
+          <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <FiAlertTriangle className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Lỗi tải dữ liệu
+          </h3>
+          <p className="text-gray-600 mb-4">
+            {error?.message || "Không thể tải danh sách người dùng"}
+          </p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 m-6 rounded-lg lg:p-6 bg-white">
+    <div className="p-4 m-6 shadow-lg rounded-lg lg:p-6 bg-white">
       {/* Header */}
       <div className="mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
@@ -762,21 +608,22 @@ const UserManagement: React.FC = () => {
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <button
-              onClick={() => setIsLoading(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 transform hover:scale-105"
+              onClick={() => refetch()}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 transform hover:scale-105 disabled:opacity-50"
             >
               <FiRefreshCw
                 className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
               />
               Làm mới
             </button>
-            <button
+            {/* <button
               onClick={() => setShowUserModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105"
             >
               <FiPlus className="w-4 h-4" />
               Thêm người dùng
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -815,15 +662,13 @@ const UserManagement: React.FC = () => {
           <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-purple-600 text-sm font-medium">
-                  Đã xác thực
-                </p>
+                <p className="text-purple-600 text-sm font-medium">Đang chờ xác thực</p>
                 <p className="text-2xl font-bold text-purple-900">
-                  {stats.verified}
+                  {stats.pending}
                 </p>
               </div>
               <div className="p-3 bg-purple-600 rounded-lg">
-                <HiOutlineCheckBadge className="w-6 h-6 text-white" />
+                <MdPendingActions className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
@@ -850,36 +695,39 @@ const UserManagement: React.FC = () => {
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
+                placeholder="Tìm kiếm theo tên hoặc email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
             </div>
 
-            {/* Desktop Filters */}
-            <div className="hidden lg:flex gap-3">
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="all">Tất cả vai trò</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
-              </select>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
-                <option value="pending">Chờ duyệt</option>
-                <option value="suspended">Tạm khóa</option>
-              </select>
-            </div>
+            {/* Role Filter */}
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value as Role | "all")}
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            >
+              <option value="all">Tất cả vai trò</option>
+              <option value={Role.USER}>Người dùng</option>
+              <option value={Role.SELLER}>Người bán</option>
+              <option value={Role.ADMIN}>Quản trị viên</option>
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={selectedStatus}
+              onChange={(e) =>
+                setSelectedStatus(e.target.value as UserStatus | "all")
+              }
+              className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            >
+              <option value="all">Tất cả trạng thái</option>
+              <option value={UserStatus.ACTIVE}>Hoạt động</option>
+              <option value={UserStatus.PENDING}>Chờ duyệt</option>
+              <option value={UserStatus.SUSPENDED}>Tạm khóa</option>
+              <option value={UserStatus.DISABLED}>Vô hiệu hóa</option>
+            </select>
 
             {/* Mobile Filter Toggle */}
             <button
@@ -890,72 +738,38 @@ const UserManagement: React.FC = () => {
               Bộ lọc
             </button>
           </div>
-
-          {/* Mobile Filters */}
-          {showMobileFilters && (
-            <div className="lg:hidden mt-4 pt-4 border-t border-gray-200 space-y-3">
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="all">Tất cả vai trò</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
-              </select>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
-                <option value="pending">Chờ duyệt</option>
-                <option value="suspended">Tạm khóa</option>
-              </select>
-            </div>
-          )}
         </div>
 
         {/* Bulk Actions */}
         {selectedUsers.length > 0 && (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <HiOutlineShieldCheck className="w-5 h-5 text-blue-600" />
-                  <span className="font-medium text-blue-900">
-                    Đã chọn {selectedUsers.length} người dùng
-                  </span>
-                </div>
+              <p className="text-blue-800 font-medium">
+                Đã chọn {selectedUsers.length} người dùng
+              </p>
+              <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setSelectedUsers([])}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+                  onClick={() => handleBulkStatusUpdate(UserStatus.ACTIVE)}
+                  className="px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-all duration-200"
                 >
-                  Bỏ chọn tất cả
+                  Kích hoạt
                 </button>
-              </div>
-              <div className="flex gap-2">
-                <select
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      handleBulkStatusUpdate(e.target.value);
-                      e.target.value = "";
-                    }
-                  }}
-                  className="px-3 py-2 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                <button
+                  onClick={() => handleBulkStatusUpdate(UserStatus.SUSPENDED)}
+                  className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 transition-all duration-200"
                 >
-                  <option value="">Cập nhật trạng thái</option>
-                  <option value="active">Kích hoạt</option>
-                  <option value="inactive">Vô hiệu hóa</option>
-                  <option value="suspended">Tạm khóa</option>
-                </select>
+                  Tạm khóa
+                </button>
+                <button
+                  onClick={() => handleBulkStatusUpdate(UserStatus.DISABLED)}
+                  className="px-3 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-all duration-200"
+                >
+                  Vô hiệu hóa
+                </button>
                 <button
                   onClick={() => openDeleteModal("bulk")}
-                  className="flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm transition-all duration-200 transform hover:scale-105"
+                  className="px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-all duration-200"
                 >
-                  <FiTrash2 className="w-4 h-4" />
                   Xóa
                 </button>
               </div>
@@ -964,318 +778,339 @@ const UserManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Users Table */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-        {/* Table Header */}
-        <div className="hidden lg:grid lg:grid-cols-12 gap-4 p-4 bg-gray-50 border-b border-gray-200 font-medium text-gray-700">
-          <div className="col-span-1 flex items-center">
-            <input
-              type="checkbox"
-              checked={
-                selectedUsers.length === filteredUsers.length &&
-                filteredUsers.length > 0
-              }
-              onChange={handleSelectAll}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200"
-            />
+      {/* Loading State */}
+      {isLoading && (
+        <div className="text-center py-8">
+          <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+            <FiRefreshCw className="w-6 h-6 text-blue-600 animate-spin" />
           </div>
-          <div className="col-span-3">Người dùng</div>
-          <div className="col-span-2">Liên hệ</div>
-          <div className="col-span-2">Vai trò & Trạng thái</div>
-          <div className="col-span-2">Hoạt động</div>
-          <div className="col-span-2 text-center">Thao tác</div>
+          <p className="text-gray-600">Đang tải dữ liệu...</p>
         </div>
+      )}
 
-        {/* Table Body */}
-        <div className="divide-y divide-gray-200">
-          {filteredUsers.length === 0 ? (
-            <div className="p-8 text-center">
+      {/* Users Table */}
+      {!isLoading && (
+        <div className="bg-white border border-gray-200 rounded-xl">
+          {/* Desktop Table */}
+          <div className="hidden lg:block  overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4 text-left">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedUsers.length === filteredUsers.length &&
+                        filteredUsers.length > 0
+                      }
+                      onChange={handleSelectAll}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Người dùng
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Vai trò
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Trạng thái
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Hoạt động
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tham gia
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Thao tác
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredUsers.map((user) => (
+                  <tr
+                    key={user.id}
+                    className="hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => handleSelectUser(user.id)}
+                        className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium mr-4">
+                          {user.firstName?.[0]}
+                          {user.lastName?.[0]}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.firstName} {user.lastName}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {user.email}
+                          </div>
+                          {user.phone && (
+                            <div className="text-sm text-gray-500 flex items-center gap-1">
+                              <FiPhone className="w-3 h-3" />
+                              {user.phone}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        {user.roles.map((role, _index) => (
+                          <span
+                            key={role}
+                            className={`inline-flex m-1 items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getRoleBadge(
+                              role
+                            )}`}
+                          >
+                            {getRoleLabel(role)}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(
+                          user.status
+                        )}`}
+                      >
+                        {getStatusLabel(user.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-1 text-gray-600">
+                          <FiActivity className="w-3 h-3" />
+                          {user.updatedAt
+                            ? formatLastLogin(user.updatedAt)
+                            : "Chưa đăng nhập"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {user.totalOrders} đơn hàng •{" "}
+                          {formatCurrency(user.totalSpent)}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <FiCalendar className="w-3 h-3" />
+                        {formatDate(user.createdAt)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-200"
+                          title="Chỉnh sửa"
+                        >
+                          <FiEdit3 className="w-4 h-4" />
+                        </button>
+                        <div className="relative group">
+                          <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200">
+                            <FiMoreVertical className="w-4 h-4" />
+                          </button>
+                          <div className="absolute right-0 top-8 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                            <div className="py-1">
+                              {user.status !== UserStatus.ACTIVE && (
+                                <button
+                                  onClick={() =>
+                                    handleUpdateUserStatus(
+                                      user.id,
+                                      UserStatus.ACTIVE
+                                    )
+                                  }
+                                  className="w-full px-4 py-2 text-left text-sm text-green-700 hover:bg-green-50 flex items-center gap-2"
+                                >
+                                  <FiUserCheck className="w-4 h-4" />
+                                  Kích hoạt
+                                </button>
+                              )}
+                              {user.status === UserStatus.ACTIVE && (
+                                <button
+                                  onClick={() =>
+                                    handleUpdateUserStatus(
+                                      user.id,
+                                      UserStatus.SUSPENDED
+                                    )
+                                  }
+                                  className="w-full px-4 py-2 text-left text-sm text-yellow-700 hover:bg-yellow-50 flex items-center gap-2"
+                                >
+                                  <FiUserX className="w-4 h-4" />
+                                  Tạm khóa
+                                </button>
+                              )}
+                              <button
+                                onClick={() =>
+                                  window.open(`mailto:${user.email}`)
+                                }
+                                className="w-full px-4 py-2 text-left text-sm text-blue-700 hover:bg-blue-50 flex items-center gap-2"
+                              >
+                                <FiMail className="w-4 h-4" />
+                                Gửi email
+                              </button>
+                              <button
+                                onClick={() =>
+                                  openDeleteModal("single", user.id)
+                                }
+                                className="w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50 flex items-center gap-2"
+                              >
+                                <FiTrash2 className="w-4 h-4" />
+                                Xóa
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden space-y-4 p-4">
+            {filteredUsers.map((user) => (
+              <div
+                key={user.id}
+                className="bg-white border border-gray-200 rounded-xl p-4"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedUsers.includes(user.id)}
+                      onChange={() => handleSelectUser(user.id)}
+                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    />
+                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium">
+                      {user.firstName?.[0]}
+                      {user.lastName?.[0]}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {user.firstName} {user.lastName}
+                      </h3>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleEditUser(user)}
+                    className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all duration-200"
+                  >
+                    <FiEdit3 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-3">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Vai trò</p>
+                    <div>
+                      {user.roles.map((role, _index) => (
+                        <span
+                          className={`inline-flex items-center m-1 px-2 py-1 rounded-full text-xs font-medium border ${getRoleBadge(
+                            role
+                          )}`}
+                        >
+                          {getRoleLabel(role)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Trạng thái</p>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
+                        user.status
+                      )}`}
+                    >
+                      {getStatusLabel(user.status)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-100 pt-3">
+                  <div className="flex items-center justify-between text-sm text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <FiCalendar className="w-3 h-3" />
+                      {formatDate(user.createdAt)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <FiActivity className="w-3 h-3" />
+                      {user.updatedAt
+                        ? formatLastLogin(user.updatedAt)
+                        : "Chưa đăng nhập"}
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {user.totalOrders} đơn hàng •{" "}
+                    {formatCurrency(user.totalSpent)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Empty State */}
+          {filteredUsers.length === 0 && !isLoading && (
+            <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <FiUsers className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 Không tìm thấy người dùng
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
               </p>
-            </div>
-          ) : (
-            filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                className="lg:grid lg:grid-cols-12 gap-4 p-4 hover:bg-gray-50 transition-all duration-200"
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedRole("all");
+                  setSelectedStatus("all");
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200"
               >
-                {/* Mobile Layout */}
-                <div className="lg:hidden space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedUsers.includes(user.id)}
-                        onChange={() => handleSelectUser(user.id)}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mt-1"
-                      />
-                      <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="w-12 h-12 rounded-full border-2 border-gray-200"
-                      />
-                      <div>
-                        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                          {user.name}
-                          {user.isVerified && (
-                            <HiOutlineCheckBadge className="w-4 h-4 text-blue-500" />
-                          )}
-                        </h3>
-                        <p className="text-sm text-gray-600">{user.email}</p>
-                        <p className="text-sm text-gray-500">{user.phone}</p>
-                      </div>
-                    </div>
-                    <div className="relative">
-                      <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-                        <FiMoreVertical className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium border ${getRoleBadge(
-                        user.role
-                      )}`}
-                    >
-                      {user.role === "admin" ? "Admin" : "User"}
-                    </span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
-                        user.status
-                      )}`}
-                    >
-                      {user.status === "active"
-                        ? "Hoạt động"
-                        : user.status === "inactive"
-                        ? "Không hoạt động"
-                        : user.status === "pending"
-                        ? "Chờ duyệt"
-                        : "Tạm khóa"}
-                    </span>
-                  </div>
-
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <div className="flex justify-between">
-                      <span>Đơn hàng:</span>
-                      <span className="font-medium">{user.totalPurchases}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Chi tiêu:</span>
-                      <span className="font-medium">
-                        {formatCurrency(user.totalSpent)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Truy cập cuối:</span>
-                      <span className="font-medium">
-                        {formatLastLogin(user.lastLogin)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 pt-2 border-t border-gray-100">
-                    <button
-                      onClick={() => handleEditUser(user)}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition-all duration-200 transform hover:scale-105"
-                    >
-                      <FiEdit3 className="w-4 h-4" />
-                      Chỉnh sửa
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal("single", user.id)}
-                      className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm transition-all duration-200 transform hover:scale-105"
-                    >
-                      <FiTrash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Desktop Layout */}
-                <div className="hidden lg:contents">
-                  {/* Checkbox */}
-                  <div className="col-span-1 flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.includes(user.id)}
-                      onChange={() => handleSelectUser(user.id)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200"
-                    />
-                  </div>
-
-                  {/* User Info */}
-                  <div className="col-span-3 flex items-center gap-3">
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="w-10 h-10 rounded-full border-2 border-gray-200"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                        {user.name}
-                        {user.isVerified && (
-                          <HiOutlineCheckBadge className="w-4 h-4 text-blue-500" />
-                        )}
-                      </h3>
-                      <p className="text-sm text-gray-600">{user.location}</p>
-                    </div>
-                  </div>
-
-                  {/* Contact */}
-                  <div className="col-span-2 space-y-1">
-                    <div className="flex items-center gap-2 text-sm">
-                      <FiMail className="w-4 h-4 text-gray-400" />
-                      <span>{user.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <FiPhone className="w-4 h-4 text-gray-400" />
-                      <span>{user.phone}</span>
-                    </div>
-                  </div>
-
-                  {/* Role & Status */}
-                  <div className="col-span-2 space-y-2">
-                    <span
-                      className={`inline-block px-2 py-1 rounded-full text-xs font-medium border ${getRoleBadge(
-                        user.role
-                      )}`}
-                    >
-                      {user.role === "admin" ? "Admin" : "User"}
-                    </span>
-                    <span
-                      className={`block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(
-                        user.status
-                      )} w-fit`}
-                    >
-                      {user.status === "active"
-                        ? "Hoạt động"
-                        : user.status === "inactive"
-                        ? "Không hoạt động"
-                        : user.status === "pending"
-                        ? "Chờ duyệt"
-                        : "Tạm khóa"}
-                    </span>
-                  </div>
-
-                  {/* Activity */}
-                  <div className="col-span-2 space-y-1 text-sm">
-                    <div className="flex items-center gap-2">
-                      <FiActivity className="w-4 h-4 text-gray-400" />
-                      <span>{user.totalPurchases} đơn hàng</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FiCalendar className="w-4 h-4 text-gray-400" />
-                      <span>{formatLastLogin(user.lastLogin)}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="col-span-2 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => handleEditUser(user)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 transform hover:scale-110"
-                      title="Chỉnh sửa"
-                    >
-                      <FiEdit3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => openDeleteModal("single", user.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110"
-                      title="Xóa"
-                    >
-                      <FiTrash2 className="w-4 h-4" />
-                    </button>
-
-                    {/* Status Quick Actions */}
-                    <div className="relative group">
-                      <button className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200">
-                        <FiMoreVertical className="w-4 h-4" />
-                      </button>
-                      <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 min-w-48">
-                        <div className="p-2">
-                          <button
-                            onClick={() =>
-                              handleUpdateUserStatus(user.id, "active")
-                            }
-                            className="w-full text-left px-3 py-2 text-sm text-green-600 hover:bg-green-50 rounded transition-colors duration-200"
-                          >
-                            <FiUserCheck className="w-4 h-4 inline mr-2" />
-                            Kích hoạt
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleUpdateUserStatus(user.id, "inactive")
-                            }
-                            className="w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded transition-colors duration-200"
-                          >
-                            <FiUserX className="w-4 h-4 inline mr-2" />
-                            Vô hiệu hóa
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleUpdateUserStatus(user.id, "suspended")
-                            }
-                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors duration-200"
-                          >
-                            <FiAlertTriangle className="w-4 h-4 inline mr-2" />
-                            Tạm khóa
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))
+                Xóa bộ lọc
+              </button>
+            </div>
           )}
         </div>
-      </div>
+      )}
 
-      {/* Pagination */}
-      {filteredUsers.length > 0 && (
-        <div className="mt-6 flex items-center justify-between">
-          <p className="text-sm text-gray-600">
-            Hiển thị {filteredUsers.length} trong tổng số {stats.total} người
-            dùng
-          </p>
-          <div className="flex gap-2">
-            <button className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-all duration-200">
-              Trước
-            </button>
-            <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm">
-              1
-            </button>
-            <button className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm transition-all duration-200">
-              Sau
-            </button>
-          </div>
+      {/* Load More Button */}
+      {hasNextPage && (
+        <div className="text-center mt-6">
+          <button
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 transform hover:scale-105"
+          >
+            {isFetchingNextPage ? (
+              <>
+                <FiRefreshCw className="w-4 h-4 animate-spin inline mr-2" />
+                Đang tải...
+              </>
+            ) : (
+              "Tải thêm"
+            )}
+          </button>
         </div>
       )}
 
       {/* Modals */}
-      <UserModal />
       <DeleteModal />
-
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 animate-fadeIn">
-          <div className="bg-white p-6 rounded-xl shadow-lg">
-            <div className="flex items-center gap-3">
-              <FiRefreshCw className="w-6 h-6 text-blue-600 animate-spin" />
-              <span className="text-gray-900 font-medium">
-                Đang tải dữ liệu...
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+      <UserModal />
     </div>
   );
 };
