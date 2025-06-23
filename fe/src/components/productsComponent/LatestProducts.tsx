@@ -13,7 +13,7 @@ interface Template {
     };
 }
 
-const LatestTemplates: React.FC = () => {
+const LatestProducts: React.FC = () => {
     const [templates, setTemplates] = useState<Template[]>([]);
     const [error, setError] = useState<string | null>(null);
 
@@ -65,4 +65,4 @@ const LatestTemplates: React.FC = () => {
     );
 };
 
-export default LatestTemplates;
+export default LatestProducts;
