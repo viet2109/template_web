@@ -27,6 +27,7 @@ const publicRoutes: Route[] = [
   { path: routers.detail, page: ProductDetails },
   { path: routers.categories, page: CategoriesProducts },
   { path: routers.cart, page: Cart },
+  { path: routers.home, page: Home, layout: DefaultLayout },
 ];
 
 const privateRoutes: Route[] = [
