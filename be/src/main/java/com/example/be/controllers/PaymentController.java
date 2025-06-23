@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +27,8 @@ public class PaymentController {
     private static final String ORDER_ID_PREFIX = "VNPAY-ODR-TESTING-";
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> createPayment(@RequestBody PaymentRequestDto dto,
-                                                             HttpServletRequest request) {
+    public ResponseEntity<String> createPayment(@RequestBody PaymentRequestDto dto,
+                                                HttpServletRequest request) {
         String ipAddress;
         try {
             ipAddress = request.getHeader("X-FORWARDED-FOR");
@@ -41,12 +40,12 @@ public class PaymentController {
         }
 
         String paymentUrl = vnPayService.createPaymentUrl(ORDER_ID_PREFIX + dto.getOrderId(), dto.getAmount(), ipAddress);
-        return ResponseEntity.ok(Collections.singletonMap("paymentUrl", paymentUrl));
+        return ResponseEntity.ok(paymentUrl);
     }
 
     @PutMapping
     public ResponseEntity<Map<String, Object>> returnPayment(
-            @RequestParam Map<String, String> params, @RequestBody Long orderId) throws Exception {
+            @RequestParam Map<String, String> params) throws Exception {
 
         boolean valid = vnPayService.validateSignature(params);
         Map<String, Object> body = new HashMap<>();
@@ -61,17 +60,18 @@ public class PaymentController {
         }
 
         String responseCode = params.get("vnp_ResponseCode");
+        String transactionRef = params.get("vnp_TxnRef");
         if ("00".equals(responseCode)) {
             body.put("status", "success");
             body.put("message", "Thanh toán thành công");
-            body.put("transactionRef", params.get("vnp_TxnRef"));
+            body.put("transactionRef", transactionRef);
             body.put("amount", params.get("vnp_Amount"));
-            userFacadeService.updateOrderStatus(userId, orderId, UpdateOrderStatusDto.builder().paymentStatus(PaymentStatus.PAID).status(OrderStatus.COMPLETED).build(),ORDER_ID_PREFIX);
+            userFacadeService.updateOrderStatus(userId, Long.valueOf(transactionRef.replace(ORDER_ID_PREFIX, "")), UpdateOrderStatusDto.builder().paymentStatus(PaymentStatus.PAID).status(OrderStatus.COMPLETED).build(), ORDER_ID_PREFIX);
         } else {
             body.put("status", "failed");
             body.put("message", "Thanh toán không thành công");
             body.put("responseCode", responseCode);
-            userFacadeService.updateOrderStatus(userId, orderId, UpdateOrderStatusDto.builder().paymentStatus(PaymentStatus.FAILED).status(OrderStatus.CANCELLED).build());
+            userFacadeService.updateOrderStatus(userId, Long.valueOf(transactionRef.replace(ORDER_ID_PREFIX, "")), UpdateOrderStatusDto.builder().paymentStatus(PaymentStatus.FAILED).status(OrderStatus.CANCELLED).build());
         }
         return ResponseEntity.ok(body);
     }

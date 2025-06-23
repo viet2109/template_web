@@ -1,18 +1,40 @@
 // import { FileDto, UpdateUserRequest, User, UserLoginResponse, UserProfileResponse } from "../types";
 // import { api } from "./api";
 
+import { AxiosResponse } from "axios";
+import {
+    CartItemDto,
+    CreateOrderDto,
+    OrderDto,
+    Page,
+    Pageable,
+} from "../types";
+import { api } from "./api";
 
+export async function fetchCart(params: Pageable): Promise<Page<CartItemDto>> {
+  try {
+    const response: AxiosResponse<Page<CartItemDto>> = await api.get("/cart", {
+      params: {
+        ...params,
+      },
+      paramsSerializer: {
+        indexes: null,
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+}
 
-// export const updateUserAvatar = async (
-//   avatarFileId: number
-// ): Promise<User> => {
-//   try {
-//     const response =  await api.put(`/profile/avatar`, { avatarFileId })
-//      return response.data;
-//   } catch (error: any) {
-//     return Promise.reject(error);
-//   }
-// };
+export async function placeOrder(dto: CreateOrderDto): Promise<OrderDto> {
+  try {
+    const response: AxiosResponse<OrderDto> = await api.post("/orders", dto);
+    return response.data;
+  } catch (error: any) {
+    return Promise.reject(error);
+  }
+}
 
 // export const getMyProfile = async (): Promise<UserProfileResponse> => {
 //   try {
@@ -34,7 +56,7 @@
 //       gender: data.gender,
 //       isMe: data.me,
 //       isfriend: data.isFriend,
-//       isfriendSended: data.isfriendSended 
+//       isfriendSended: data.isfriendSended
 //     };
 //   } catch (error: any) {
 //     return Promise.reject(error);
@@ -64,7 +86,7 @@
 //       isMe: data.me,
 //       isfriend: data.isFriend,
 //       isfriendSended: data.isfriendSended
-    
+
 //     };
 //   } catch (error: any) {
 //     return Promise.reject(error);

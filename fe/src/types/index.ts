@@ -11,11 +11,6 @@ export interface User {
   email: string;
 }
 
-export interface UserLoginResponse {
-  user: User;
-  token: string;
-}
-
 export enum OrderStatus {
   PENDING = "PENDING",
   PROCESSING = "PROCESSING",
@@ -242,32 +237,32 @@ export interface AdminUserDto {
   phone: string;
   avatar: FileDto | null;
   provider: AuthProvider;
-  createdAt: string;       // ISO datetime
-  updatedAt: string;       // ISO datetime
+  createdAt: string; // ISO datetime
+  updatedAt: string; // ISO datetime
   status: UserStatus;
   roles: Role[];
   totalOrders: number;
-  totalSpent: number;      // Double → number
+  totalSpent: number; // Double → number
 }
 
 export enum AuthProvider {
-  LOCAL = 'LOCAL',
-  GOOGLE = 'GOOGLE',
-  FACEBOOK = 'FACEBOOK',
+  LOCAL = "LOCAL",
+  GOOGLE = "GOOGLE",
+  FACEBOOK = "FACEBOOK",
 }
 
 export enum UserStatus {
-  PENDING = "PENDING",    // chờ kích hoạt
-    ACTIVE = "ACTIVE",     // đang hoạt động
-    SUSPENDED = "SUSPENDED",  // tạm khoá
-    DISABLED = "DISABLED",   // vô hiệu hoá
-    DELETED = "DELETED",    // đã xoá (soft delete)
+  PENDING = "PENDING", // chờ kích hoạt
+  ACTIVE = "ACTIVE", // đang hoạt động
+  SUSPENDED = "SUSPENDED", // tạm khoá
+  DISABLED = "DISABLED", // vô hiệu hoá
+  DELETED = "DELETED", // đã xoá (soft delete)
 }
 
 export enum Role {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-  SELLER = 'SELLER',
+  USER = "USER",
+  ADMIN = "ADMIN",
+  SELLER = "SELLER",
 }
 
 export interface AdminTemplateDto {
@@ -298,7 +293,7 @@ export interface AdminTemplateDto {
   rejectionReason: string | null;
   licenseType: LicenseType;
   seller: SellerBasicDto;
-};
+}
 
 export enum TemplateStatus {
   PENDING = "PENDING",
@@ -331,15 +326,15 @@ export interface AdminDashboardDto {
 }
 
 export interface MonthlySalesDto {
-  monthDto: string;      // e.g. "2025-06"
-  totalSales: number;    // Long → number
-  totalRevenue: string;  // BigDecimal → string
+  monthDto: string; // e.g. "2025-06"
+  totalSales: number; // Long → number
+  totalRevenue: string; // BigDecimal → string
 }
 
 export interface TopSellerDto {
   id: number;
   name: string;
-  totalSales: number;    // Double → number
+  totalSales: number; // Double → number
   totalTemplates: number;
   rating: number;
 }
@@ -349,6 +344,87 @@ export interface TopTemplateDto {
   name: string;
   sellerName: string;
   totalSales: number;
-  totalRevenue: number;  // Double → number
+  totalRevenue: number; // Double → number
   rating: number;
+}
+
+export interface UserProfileDto {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  avatar: FileDto; // tương ứng với FileDto bên Java
+  status: UserStatus; // enum UserStatus
+  provider: AuthProvider; // enum AuthProvider
+  roles: Role[]; // Set<Role> → mảng Role[]
+  createdAt: string; // LocalDateTime → chuỗi ISO
+  updatedAt: string;
+}
+
+export interface AuthenticationResponse {
+  accessToken: string;
+  user: UserProfileDto;
+}
+
+// Interface cho CartItemDto
+export interface CartItemDto {
+  id: number;
+  template: TemplateCardDto;
+  createdAt: string;
+}
+
+export interface CreateOrderDto {
+  paymentMethod: PaymentMethod;
+  billingInfo: string;
+  notes?: string;
+  couponCode?: string;
+  cartItemIds: number[];
+}
+
+export interface CouponBasicDto {
+  id: number;
+  code: string;
+  usageLimit: number;
+  usedCount: number;
+}
+
+// Interface for CouponUsageBasicDto
+export interface CouponUsageBasicDto {
+  id: number;
+  coupon: CouponBasicDto;
+  discountAmount: number;
+  usedAt: string;
+}
+
+// Interface for OrderItemDto
+export interface OrderItemDto {
+  id: number;
+  template: TemplateCardDto;
+  price: number;
+  licenseType: LicenseType;
+  createdAt: string;
+  isReviewed: boolean;
+}
+
+// Interface for OrderDto
+export interface OrderDto {
+  id: number;
+  taxAmount: number;
+  currency: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  paymentMethod: PaymentMethod;
+  paymentTransactionId?: string;
+  billingInfo: string;
+  notes?: string;
+  createdAt: string;
+  completedAt?: string;
+  orderItems: OrderItemDto[];
+  couponUsages: CouponUsageBasicDto[];
+}
+
+export interface PaymentRequestDto {
+  orderId: number;
+  amount: number;
 }
