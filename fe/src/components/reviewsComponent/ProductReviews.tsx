@@ -220,14 +220,12 @@ const ProductReviews: React.FC = () => {
         reviewer: "",
     });
     const [comments, setComments] = useState<Comment[]>(commentsDataInit);
-    const [replyBoxes, setReplyBoxes] = useState<{ [key: number]: string }>({});
+    const [commentText, setCommentText] = useState("");
 
     const visibleReviews = showAll ? reviews : reviews.slice(0, 3);
 
     const handleChange = (
-        e: React.ChangeEvent<
-            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-        >
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -253,44 +251,17 @@ const ProductReviews: React.FC = () => {
         });
     };
 
-    const toggleReply = (commentId: number) => {
-        setReplyBoxes((prev) => ({
-            ...prev,
-            [commentId]: prev[commentId] ? "" : "",
-        }));
-    };
-
-    const handleReplyChange = (id: number, value: string) => {
-        setReplyBoxes((prev) => ({
-            ...prev,
-            [id]: value,
-        }));
-    };
-
-    const handleReplySubmit = (id: number) => {
-        const text = replyBoxes[id];
-        if (!text.trim()) return;
-
-        setComments((prev) =>
-            prev.map((c) =>
-                c.id === id
-                    ? {
-                        ...c,
-                        replies: [
-                            ...(c.replies || []),
-                            {
-                                id: Date.now(),
-                                user: "you",
-                                message: text,
-                                timeAgo: "vừa xong",
-                            },
-                        ],
-                    }
-                    : c
-            )
-        );
-
-        setReplyBoxes((prev) => ({ ...prev, [id]: "" }));
+    const handleCommentSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!commentText.trim()) return;
+        const newComment: Comment = {
+            id: Date.now(),
+            user: "you",
+            message: commentText,
+            timeAgo: "vừa xong",
+        };
+        setComments([newComment, ...comments]);
+        setCommentText("");
     };
 
     return (
@@ -305,8 +276,8 @@ const ProductReviews: React.FC = () => {
                 >
                     Đánh giá
                     <span className="ml-1 bg-[#2973B2] text-white text-xs font-bold px-2 py-1 rounded-full">
-    {reviews.length}
-</span>
+            {reviews.length}
+          </span>
                 </button>
                 <button
                     onClick={() => setActiveTab("comments")}
@@ -316,15 +287,15 @@ const ProductReviews: React.FC = () => {
                 >
                     Bình luận
                     <span className="ml-1 bg-[#2973B2] text-white text-xs font-bold px-2 py-1 rounded-full">
-    {comments.length}
-</span>
+            {comments.length}
+          </span>
                 </button>
             </div>
 
             {/* Reviews tab */}
             {activeTab === "reviews" && (
                 <>
-                <h2 className="text-lg font-semibold mb-2 text-blue-900">
+                    <h2 className="text-lg font-semibold mb-2 text-blue-900">
                         {reviews.length} Lượt đánh giá
                     </h2>
                     <ReviewForm
@@ -333,7 +304,7 @@ const ProductReviews: React.FC = () => {
                         onSubmit={handleSubmit}
                     />
                     {visibleReviews.map((review) => (
-                        <ReviewItem key={review.id} review={review}/>
+                        <ReviewItem key={review.id} review={review} />
                     ))}
                     {reviews.length > 3 && (
                         <div className="text-center">
@@ -356,28 +327,13 @@ const ProductReviews: React.FC = () => {
                     </h2>
 
                     {/* Comment Form */}
-                    <form
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            const message = replyBoxes[0];
-                            if (!message?.trim()) return;
-                            const newComment: Comment = {
-                                id: Date.now(),
-                                user: "you",
-                                message: message,
-                                timeAgo: "vừa xong",
-                            };
-                            setComments([newComment, ...comments]);
-                            setReplyBoxes((prev) => ({...prev, 0: ""}));
-                        }}
-                        className="flex flex-col gap-2 mb-6"
-                    >
-      <textarea
-          placeholder="Viết bình luận của bạn..."
-          className="border rounded p-2 text-sm"
-          value={replyBoxes[0] || ""}
-          onChange={(e) => handleReplyChange(0, e.target.value)}
-      />
+                    <form onSubmit={handleCommentSubmit} className="flex flex-col gap-2 mb-6">
+            <textarea
+                placeholder="Viết bình luận của bạn..."
+                className="border rounded p-2 text-sm"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+            />
                         <div className="text-right">
                             <button
                                 type="submit"
@@ -394,68 +350,25 @@ const ProductReviews: React.FC = () => {
                             <div className="mb-1">
                                 <span className="font-bold">{comment.user}</span>
                                 {comment.purchased && (
-                                    <span className="ml-2 text-xs font-semibold" style={{color: "#48A6A7"}}>
-              Đã mua hàng
-            </span>
+                                    <span
+                                        className="ml-2 text-xs font-semibold"
+                                        style={{ color: "#48A6A7" }}
+                                    >
+                    Đã mua hàng
+                  </span>
                                 )}
                                 {comment.isAuthor && (
                                     <span className="ml-2 text-blue-600 text-xs font-semibold">
-              Tác giả
-            </span>
+                    Tác giả
+                  </span>
                                 )}
                             </div>
                             <div className="text-xs text-gray-500 mb-1">{comment.timeAgo}</div>
                             <p className="whitespace-pre-line">{comment.message}</p>
-
-                            {/* Reply box toggle + reply list */}
-                            <div className="mt-2">
-                                <button
-                                    className="text-xs hover:underline"
-                                    style={{ color: "#2973B2" }}
-                                    onClick={() => toggleReply(comment.id)}
-                                >
-                                    Trả lời
-                                </button>
-
-                                {replyBoxes[comment.id] !== undefined && (
-                                    <div className="mt-2">
-              <textarea
-                  className="border rounded p-2 text-sm w-full"
-                  placeholder="Nhập trả lời..."
-                  value={replyBoxes[comment.id]}
-                  onChange={(e) => handleReplyChange(comment.id, e.target.value)}
-              />
-                                        <div className="text-right">
-                                            <button
-                                                onClick={() => handleReplySubmit(comment.id)}
-                                                className="bg-[#2973B2] text-white px-3 py-1 mt-2 rounded text-xs hover:bg-[#1f5c90] transition"
-                                            >
-                                                Gửi trả lời
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {comment.replies?.map((reply) => (
-                                    <div
-                                        key={reply.id}
-                                        className="mt-4 ml-4 pl-4 border-l border-gray-200"
-                                    >
-                                        <div className="mb-1">
-                                            <span className="font-bold">{reply.user}</span>
-                                            <span className="ml-2 text-xs text-gray-500">
-                  {reply.timeAgo}
-                </span>
-                                        </div>
-                                        <p className="whitespace-pre-line">{reply.message}</p>
-                                    </div>
-                                ))}
-                            </div>
                         </div>
                     ))}
                 </div>
             )}
-
         </div>
     );
 };
