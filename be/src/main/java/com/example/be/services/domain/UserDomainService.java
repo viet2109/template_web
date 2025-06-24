@@ -155,7 +155,7 @@ public class UserDomainService {
         String subject = "Xác thực tài khoản trên YourApp";
 
         // Tạo link xác thực
-        String verifyUrl = String.format("%s/auth/verify-email?token=%s", frontendUrl, token);
+        String verifyUrl = String.format("%s/verify-email?token=%s", frontendUrl, token);
 
         // Xây dựng nội dung email (HTML) bằng StringBuilder
         StringBuilder sb = new StringBuilder();
