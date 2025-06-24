@@ -127,8 +127,6 @@ function Login(_props: Props) {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-      <Header />
-
       <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           {/* Card Container with modern styling */}
@@ -257,7 +255,7 @@ function Login(_props: Props) {
 
                 <div className="text-sm">
                   <Link
-                    to="/forgot-password"
+                    to={routers.forgotPass}
                     className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
                   >
                     Quên mật khẩu?

@@ -1,7 +1,11 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer.tsx";
 
-interface Props {}
+import { ReactNode } from "react";
+
+interface Props {
+  children?: ReactNode;
+}
 
 function DefaultLayout({ children }: Props) {
   // const {} = props;
